@@ -1,0 +1,77 @@
+@model IEnumerable<FashionShop.Web.Models.Entities.DonHang>
+
+@{
+    ViewData["Title"] = "Lịch sử đơn hàng";
+}
+
+<section class="order-history-page">
+    <div class="container">
+        <div class="page-title">
+            <h1>Lịch sử đơn hàng</h1>
+            <p>Theo dõi các đơn hàng bạn đã đặt tại FashionShop.</p>
+        </div>
+
+        @if (Model != null && Model.Any())
+        {
+            <div class="order-history-list">
+                @foreach (var item in Model)
+                {
+                    <div class="order-history-card">
+                        <div class="order-history-main">
+                            <div>
+                                <h3>Đơn hàng #@item.Id</h3>
+                                <p>Ngày đặt: @item.NgayDat.ToString("dd/MM/yyyy HH:mm")</p>
+                                <p>Số sản phẩm: @(item.ChiTietDonHangs?.Count ?? 0)</p>
+                            </div>
+
+                            <div class="order-history-price">
+                                <span class="order-status @GetStatusClass(item.TrangThai)">
+                                    @item.TrangThai
+                                </span>
+
+                                <strong>@item.TongTien.ToString("N0") đ</strong>
+                            </div>
+                        </div>
+
+                        <div class="order-history-footer">
+                            <div>
+                                <span>Người nhận:</span>
+                                <strong>@item.HoTenNguoiNhan</strong>
+                            </div>
+
+                            <a asp-controller="Order" asp-action="Details" asp-route-id="@item.Id" class="btn-main">
+                                Xem chi tiết
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="empty-order-box">
+                <h3>Bạn chưa có đơn hàng nào</h3>
+                <p>Hãy chọn sản phẩm yêu thích và đặt hàng ngay.</p>
+
+                <a asp-controller="Product" asp-action="Index" class="btn-main">
+                    Mua sắm ngay
+                </a>
+            </div>
+        }
+    </div>
+</section>
+
+@functions {
+    string GetStatusClass(string trangThai)
+    {
+        return trangThai switch
+        {
+            "Chờ xác nhận" => "status-pending",
+            "Đã xác nhận" => "status-confirmed",
+            "Đang giao" => "status-shipping",
+            "Hoàn thành" => "status-completed",
+            "Đã hủy" => "status-cancelled",
+            _ => "status-default"
+        };
+    }
+}

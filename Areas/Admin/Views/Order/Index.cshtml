@@ -1,0 +1,156 @@
+@model IEnumerable<FashionShop.Web.Models.Entities.DonHang>
+
+@{
+    ViewData["Title"] = "Quản lý đơn hàng";
+    var trangThaiList = ViewBag.TrangThaiList as List<string>;
+}
+
+<div class="admin-page-header">
+    <div>
+        <h2>Quản lý đơn hàng</h2>
+        <p>Theo dõi, tìm kiếm và xử lý đơn hàng của khách hàng.</p>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+<div class="admin-card" style="margin-bottom: 20px;">
+    <form asp-area="Admin" asp-controller="Order" asp-action="Index" method="get" class="filter-form">
+        <div class="form-group">
+            <label>Tìm kiếm</label>
+            <input type="text" name="keyword" value="@ViewBag.Keyword" class="form-control"
+                   placeholder="Tên người nhận hoặc số điện thoại..." />
+        </div>
+
+        <div class="form-group">
+            <label>Trạng thái</label>
+            <select name="trangThai" class="form-control">
+                <option value="">Tất cả trạng thái</option>
+
+                @if (trangThaiList != null)
+                {
+                    foreach (var item in trangThaiList)
+                    {
+                        if (ViewBag.TrangThai == item)
+                        {
+                            <option value="@item" selected>@item</option>
+                        }
+                        else
+                        {
+                            <option value="@item">@item</option>
+                        }
+                    }
+                }
+            </select>
+        </div>
+
+        <div class="form-group filter-actions">
+            <button type="submit" class="btn btn-primary">
+                Lọc
+            </button>
+
+            <a asp-area="Admin" asp-controller="Order" asp-action="Index" class="btn btn-secondary">
+                Làm mới
+            </a>
+        </div>
+    </form>
+</div>
+
+<div class="admin-card">
+    @if (Model != null && Model.Any())
+    {
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Mã đơn</th>
+                    <th>Khách hàng</th>
+                    <th>Người nhận</th>
+                    <th>Số điện thoại</th>
+                    <th>Ngày đặt</th>
+                    <th>Tổng tiền</th>
+                    <th>Trạng thái</th>
+                    <th style="width: 150px;">Thao tác</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            <strong>#@item.Id</strong>
+                        </td>
+
+                        <td>
+                            @if (item.NguoiDung != null)
+                            {
+                                <span>@item.NguoiDung.HoTen</span>
+                                <div class="text-muted">@item.NguoiDung.Email</div>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Khách vãng lai</span>
+                            }
+                        </td>
+
+                        <td>@item.HoTenNguoiNhan</td>
+
+                        <td>@item.SoDienThoai</td>
+
+                        <td>@item.NgayDat.ToString("dd/MM/yyyy HH:mm")</td>
+
+                        <td>
+                            <strong>@item.TongTien.ToString("N0") đ</strong>
+                        </td>
+
+                        <td>
+                            <span class="order-status @GetStatusClass(item.TrangThai)">
+                                @item.TrangThai
+                            </span>
+                        </td>
+
+                        <td>
+                            <a asp-area="Admin" asp-controller="Order" asp-action="Details" asp-route-id="@item.Id"
+                               class="btn btn-primary btn-sm">
+                                Chi tiết
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="empty-box">
+            Chưa có đơn hàng nào.
+        </div>
+    }
+</div>
+
+@functions {
+    string GetStatusClass(string trangThai)
+    {
+        return trangThai switch
+        {
+            "Chờ xác nhận" => "status-pending",
+            "Đã xác nhận" => "status-confirmed",
+            "Đang giao" => "status-shipping",
+            "Hoàn thành" => "status-completed",
+            "Đã hủy" => "status-cancelled",
+            _ => "status-default"
+        };
+    }
+}

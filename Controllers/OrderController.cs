@@ -21,6 +21,13 @@ namespace FashionShop.Web.Controllers
         [HttpGet]
         public IActionResult Checkout()
         {
+            var userId = HttpContext.Session.GetInt32("UserId");
+
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
             var cart = GetCart();
 
             if (!cart.Any())
@@ -41,6 +48,13 @@ namespace FashionShop.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Checkout(CheckoutViewModel model)
         {
+            var userId = HttpContext.Session.GetInt32("UserId");
+
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
             var cart = GetCart();
 
             if (!cart.Any())
@@ -70,12 +84,14 @@ namespace FashionShop.Web.Controllers
                     if (sanPham == null)
                     {
                         ModelState.AddModelError("", $"Sản phẩm {item.TenSanPham} không còn tồn tại.");
+                        await transaction.RollbackAsync();
                         return View(model);
                     }
 
                     if (sanPham.SoLuongTon < item.SoLuong)
                     {
                         ModelState.AddModelError("", $"Sản phẩm {item.TenSanPham} chỉ còn {sanPham.SoLuongTon} sản phẩm.");
+                        await transaction.RollbackAsync();
                         return View(model);
                     }
 
@@ -84,6 +100,7 @@ namespace FashionShop.Web.Controllers
 
                 var donHang = new DonHang
                 {
+                    NguoiDungId = userId.Value,
                     NgayDat = DateTime.Now,
                     TongTien = tongTien,
                     TrangThai = "Chờ xác nhận",
@@ -137,6 +154,45 @@ namespace FashionShop.Web.Controllers
                 .Include(dh => dh.ChiTietDonHangs)
                 .ThenInclude(ct => ct.SanPham)
                 .FirstOrDefaultAsync(dh => dh.Id == id);
+
+            if (donHang == null)
+            {
+                return NotFound();
+            }
+
+            return View(donHang);
+        }
+        public async Task<IActionResult> History()
+        {
+            var userId = HttpContext.Session.GetInt32("UserId");
+
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var donHangs = await _context.DonHangs
+                .Where(x => x.NguoiDungId == userId.Value)
+                .Include(x => x.ChiTietDonHangs)
+                .OrderByDescending(x => x.NgayDat)
+                .ToListAsync();
+
+            return View(donHangs);
+        }
+
+        public async Task<IActionResult> Details(int id)
+        {
+            var userId = HttpContext.Session.GetInt32("UserId");
+
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var donHang = await _context.DonHangs
+                .Include(x => x.ChiTietDonHangs)
+                    .ThenInclude(x => x.SanPham)
+                .FirstOrDefaultAsync(x => x.Id == id && x.NguoiDungId == userId.Value);
 
             if (donHang == null)
             {

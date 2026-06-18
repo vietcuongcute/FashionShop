@@ -1,0 +1,144 @@
+@model FashionShop.Web.Models.Entities.DonHang
+
+@{
+    ViewData["Title"] = "Chi tiết đơn hàng";
+}
+
+<section class="order-detail-page">
+    <div class="container">
+        <div class="page-title page-title-row">
+            <div>
+                <h1>Chi tiết đơn hàng #@Model.Id</h1>
+                <p>Thông tin sản phẩm, giao hàng và trạng thái đơn hàng.</p>
+            </div>
+
+            <a asp-controller="Order" asp-action="History" class="btn-outline">
+                Quay lại
+            </a>
+        </div>
+
+        <div class="customer-order-grid">
+            <div class="customer-order-card">
+                <h3>Thông tin đơn hàng</h3>
+
+                <div class="info-line">
+                    <span>Mã đơn:</span>
+                    <strong>#@Model.Id</strong>
+                </div>
+
+                <div class="info-line">
+                    <span>Ngày đặt:</span>
+                    <strong>@Model.NgayDat.ToString("dd/MM/yyyy HH:mm")</strong>
+                </div>
+
+                <div class="info-line">
+                    <span>Trạng thái:</span>
+                    <strong class="order-status @GetStatusClass(Model.TrangThai)">
+                        @Model.TrangThai
+                    </strong>
+                </div>
+
+                <div class="info-line">
+                    <span>Tổng tiền:</span>
+                    <strong class="price-text">@Model.TongTien.ToString("N0") đ</strong>
+                </div>
+
+                <div class="info-line">
+                    <span>Ghi chú:</span>
+                    <strong>
+                        @if (!string.IsNullOrWhiteSpace(Model.GhiChu))
+                        {
+                            @Model.GhiChu
+                        }
+                        else
+                        {
+                            <span class="muted-text">Không có ghi chú</span>
+                        }
+                    </strong>
+                </div>
+            </div>
+
+            <div class="customer-order-card">
+                <h3>Thông tin giao hàng</h3>
+
+                <div class="info-line">
+                    <span>Người nhận:</span>
+                    <strong>@Model.HoTenNguoiNhan</strong>
+                </div>
+
+                <div class="info-line">
+                    <span>Số điện thoại:</span>
+                    <strong>@Model.SoDienThoai</strong>
+                </div>
+
+                <div class="info-line">
+                    <span>Địa chỉ:</span>
+                    <strong>@Model.DiaChiGiaoHang</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="customer-order-card order-items-card">
+            <h3>Sản phẩm đã mua</h3>
+
+            @if (Model.ChiTietDonHangs != null && Model.ChiTietDonHangs.Any())
+            {
+                <div class="customer-order-items">
+                    @foreach (var item in Model.ChiTietDonHangs)
+                    {
+                        <div class="customer-order-item">
+                            <div class="customer-order-product">
+                                @if (!string.IsNullOrWhiteSpace(item.SanPham?.HinhAnh))
+                                {
+                                    <img src="@item.SanPham.HinhAnh" alt="@item.SanPham.TenSanPham" />
+                                }
+                                else
+                                {
+                                    <div class="order-no-image">
+                                        No image
+                                    </div>
+                                }
+
+                                <div>
+                                    <h4>@(item.SanPham?.TenSanPham ?? "Sản phẩm đã xóa")</h4>
+                                    <p>Đơn giá: @item.DonGia.ToString("N0") đ</p>
+                                </div>
+                            </div>
+
+                            <div class="customer-order-summary">
+                                <span>Số lượng: @item.SoLuong</span>
+                                <strong>@item.ThanhTien.ToString("N0") đ</strong>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="order-total-line">
+                    <span>Tổng cộng</span>
+                    <strong>@Model.TongTien.ToString("N0") đ</strong>
+                </div>
+            }
+            else
+            {
+                <div class="empty-order-box">
+                    Không có sản phẩm trong đơn hàng này.
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+@functions {
+    string GetStatusClass(string trangThai)
+    {
+        return trangThai switch
+        {
+            "Chờ xác nhận" => "status-pending",
+            "Đã xác nhận" => "status-confirmed",
+            "Đang giao" => "status-shipping",
+            "Hoàn thành" => "status-completed",
+            "Đã hủy" => "status-cancelled",
+            _ => "status-default"
+        };
+    }
+}

@@ -1,0 +1,66 @@
+@model FashionShop.Web.Models.Entities.DanhMuc
+
+@{
+    ViewData["Title"] = "Xóa danh mục";
+}
+
+<div class="admin-page-header">
+    <div>
+        <h2>Xóa danh mục</h2>
+        <p>Kiểm tra kỹ trước khi xóa danh mục.</p>
+    </div>
+
+    <a asp-area="Admin" asp-controller="Category" asp-action="Index" class="btn btn-secondary">
+        Quay lại
+    </a>
+</div>
+
+<div class="admin-card form-card">
+    <div class="delete-warning">
+        <h3>Bạn có chắc muốn xóa danh mục này?</h3>
+        <p>Nếu danh mục đang có sản phẩm thì hệ thống sẽ không cho xóa.</p>
+    </div>
+
+    <div class="detail-row">
+        <strong>Mã danh mục:</strong>
+        <span>#@Model.Id</span>
+    </div>
+
+    <div class="detail-row">
+        <strong>Tên danh mục:</strong>
+        <span>@Model.TenDanhMuc</span>
+    </div>
+
+    <div class="detail-row">
+        <strong>Mô tả:</strong>
+        <span>
+            @if (!string.IsNullOrWhiteSpace(Model.MoTa))
+            {
+                @Model.MoTa
+            }
+            else
+            {
+                <span class="text-muted">Chưa có mô tả</span>
+            }
+        </span>
+    </div>
+
+    <div class="detail-row">
+        <strong>Số sản phẩm đang thuộc danh mục:</strong>
+        <span>@(Model.SanPhams?.Count ?? 0)</span>
+    </div>
+
+    <form asp-area="Admin" asp-controller="Category" asp-action="DeleteConfirmed" method="post" class="form-actions">
+        @Html.AntiForgeryToken()
+
+        <input type="hidden" name="id" value="@Model.Id" />
+
+        <button type="submit" class="btn btn-danger">
+            Xác nhận xóa
+        </button>
+
+        <a asp-area="Admin" asp-controller="Category" asp-action="Index" class="btn btn-secondary">
+            Hủy
+        </a>
+    </form>
+</div>

@@ -1,0 +1,151 @@
+@model IEnumerable<FashionShop.Web.Models.Entities.SanPham>
+
+@{
+    ViewData["Title"] = "Quản lý sản phẩm";
+}
+
+<div class="admin-page-header">
+    <div>
+        <h2>Quản lý sản phẩm</h2>
+        <p>Thêm, sửa, xóa và quản lý tồn kho sản phẩm thời trang.</p>
+    </div>
+
+    <a asp-area="Admin" asp-controller="Product" asp-action="Create" class="btn btn-primary">
+        + Thêm sản phẩm
+    </a>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+<div class="admin-card" style="margin-bottom: 20px;">
+    <form asp-area="Admin" asp-controller="Product" asp-action="Index" method="get" class="filter-form">
+        <div class="form-group">
+            <label>Tìm kiếm sản phẩm</label>
+            <input type="text" name="keyword" value="@ViewBag.Keyword" class="form-control"
+                   placeholder="Nhập tên sản phẩm..." />
+        </div>
+
+        <div class="form-group">
+            <label>Danh mục</label>
+            <select name="danhMucId" class="form-control" asp-items="ViewBag.DanhMucs">
+                <option value="">Tất cả danh mục</option>
+            </select>
+        </div>
+
+        <div class="form-group filter-actions">
+            <button type="submit" class="btn btn-primary">
+                Lọc
+            </button>
+
+            <a asp-area="Admin" asp-controller="Product" asp-action="Index" class="btn btn-secondary">
+                Làm mới
+            </a>
+        </div>
+    </form>
+</div>
+
+<div class="admin-card">
+    @if (Model != null && Model.Any())
+    {
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Ảnh</th>
+                    <th>Tên sản phẩm</th>
+                    <th>Danh mục</th>
+                    <th>Giá</th>
+                    <th>Tồn kho</th>
+                    <th>Nổi bật</th>
+                    <th style="width: 220px;">Thao tác</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            @if (!string.IsNullOrWhiteSpace(item.HinhAnh))
+                            {
+                                <img src="@item.HinhAnh" alt="@item.TenSanPham" class="admin-product-img" />
+                            }
+                            else
+                            {
+                                <div class="admin-product-img no-image">
+                                    No image
+                                </div>
+                            }
+                        </td>
+
+                        <td>
+                            <strong>@item.TenSanPham</strong>
+                            <div class="text-muted">#@item.Id</div>
+                        </td>
+
+                        <td>
+                            @(item.DanhMuc?.TenDanhMuc ?? "Chưa có")
+                        </td>
+
+                        <td>
+                            @item.Gia.ToString("N0") đ
+                        </td>
+
+                        <td>
+                            @if (item.SoLuongTon <= 5)
+                            {
+                                <span class="badge badge-danger">@item.SoLuongTon</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-success">@item.SoLuongTon</span>
+                            }
+                        </td>
+
+                        <td>
+                            @if (item.NoiBat)
+                            {
+                                <span class="badge badge-success">Có</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-secondary">Không</span>
+                            }
+                        </td>
+
+                        <td>
+                            <div class="table-actions">
+                                <a asp-area="Admin" asp-controller="Product" asp-action="Edit" asp-route-id="@item.Id"
+                                   class="btn btn-warning btn-sm">
+                                    Sửa
+                                </a>
+
+                                <a asp-area="Admin" asp-controller="Product" asp-action="Delete" asp-route-id="@item.Id"
+                                   class="btn btn-danger btn-sm">
+                                    Xóa
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="empty-box">
+            Chưa có sản phẩm nào.
+        </div>
+    }
+</div>

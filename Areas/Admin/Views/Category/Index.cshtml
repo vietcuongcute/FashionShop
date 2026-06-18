@@ -1,0 +1,90 @@
+@model IEnumerable<FashionShop.Web.Models.Entities.DanhMuc>
+
+@{
+    ViewData["Title"] = "Quản lý danh mục";
+}
+
+<div class="admin-page-header">
+    <div>
+        <h2>Quản lý danh mục</h2>
+        <p>Thêm, sửa, xóa các nhóm sản phẩm trong cửa hàng.</p>
+    </div>
+
+    <a asp-area="Admin" asp-controller="Category" asp-action="Create" class="btn btn-primary">
+        + Thêm danh mục
+    </a>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+<div class="admin-card">
+    @if (Model.Any())
+    {
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Mã</th>
+                    <th>Tên danh mục</th>
+                    <th>Mô tả</th>
+                    <th>Số sản phẩm</th>
+                    <th style="width: 220px;">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>#@item.Id</td>
+                        <td>
+                            <strong>@item.TenDanhMuc</strong>
+                        </td>
+                        <td>
+                            @if (!string.IsNullOrWhiteSpace(item.MoTa))
+                            {
+                                @item.MoTa
+                            }
+                            else
+                            {
+                                <span class="text-muted">Chưa có mô tả</span>
+                            }
+                        </td>
+                        <td>
+                            @(item.SanPhams?.Count ?? 0)
+                        </td>
+                        <td>
+                            <div class="table-actions">
+                                <a asp-area="Admin" asp-controller="Category" asp-action="Edit" asp-route-id="@item.Id"
+                                   class="btn btn-warning btn-sm">
+                                    Sửa
+                                </a>
+
+                                <a asp-area="Admin" asp-controller="Category" asp-action="Delete" asp-route-id="@item.Id"
+                                   class="btn btn-danger btn-sm">
+                                    Xóa
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="empty-box">
+            Chưa có danh mục nào.
+        </div>
+    }
+</div>

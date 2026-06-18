@@ -1,0 +1,87 @@
+﻿@model IEnumerable<FashionShop.Web.Models.Entities.SanPham>
+
+@{
+    ViewData["Title"] = "Trang chủ";
+}
+
+<section class="hero-section">
+    <div class="hero-content">
+        <span class="hero-badge">Fashion Shop</span>
+        <h1>Thời trang hiện đại cho phong cách của bạn</h1>
+        <p>
+            Khám phá các mẫu quần áo thời trang mới nhất, dễ phối đồ,
+            phù hợp đi học, đi làm và đi chơi.
+        </p>
+        <a href="#san-pham-moi" class="btn-hero">Mua sắm ngay</a>
+    </div>
+</section>
+
+<section class="category-section">
+    <div class="section-title">
+        <h2>Danh mục nổi bật</h2>
+        <p>Lựa chọn phong cách phù hợp với bạn</p>
+    </div>
+
+    <div class="category-grid">
+        <div class="category-card">Áo thun</div>
+        <div class="category-card">Áo sơ mi</div>
+        <div class="category-card">Quần jean</div>
+        <div class="category-card">Váy</div>
+        <div class="category-card">Áo khoác</div>
+    </div>
+</section>
+
+<section class="product-section" id="san-pham-moi">
+    <div class="section-title">
+        <h2>Sản phẩm mới nhất</h2>
+        <p>Các sản phẩm đang có tại cửa hàng</p>
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="product-grid">
+            @foreach (var item in Model)
+            {
+                <div class="product-card">
+                    <div class="product-image">
+                        @if (!string.IsNullOrEmpty(item.HinhAnh))
+                        {
+                            <img src="@item.HinhAnh" alt="@item.TenSanPham" />
+                        }
+                        else
+                        {
+                            <div class="image-placeholder">
+                                Chưa có ảnh
+                            </div>
+                        }
+                    </div>
+
+                    <div class="product-info">
+                        <span class="product-category">
+                            @(item.DanhMuc?.TenDanhMuc ?? "Chưa có danh mục")
+                        </span>
+
+                        <h3>@item.TenSanPham</h3>
+
+                        <p class="product-desc">
+                            @item.MoTa
+                        </p>
+
+                        <div class="product-bottom">
+                            <strong>@item.Gia.ToString("N0") đ</strong>
+                            <a asp-controller="Product" asp-action="Details" asp-route-id="@item.Id" class="btn-detail">
+                                Xem chi tiết
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="empty-box">
+            Chưa có sản phẩm nào trong database.
+        </div>
+    }
+</section>

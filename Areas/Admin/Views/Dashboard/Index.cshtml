@@ -1,0 +1,120 @@
+@model FashionShop.Web.Models.ViewModels.AdminDashboardViewModel
+
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="admin-stat-grid">
+    <div class="admin-stat-card">
+        <span>Tổng sản phẩm</span>
+        <strong>@Model.TongSanPham</strong>
+        <p>Sản phẩm đang quản lý</p>
+    </div>
+
+    <div class="admin-stat-card">
+        <span>Tổng danh mục</span>
+        <strong>@Model.TongDanhMuc</strong>
+        <p>Nhóm sản phẩm</p>
+    </div>
+
+    <div class="admin-stat-card">
+        <span>Tổng đơn hàng</span>
+        <strong>@Model.TongDonHang</strong>
+        <p>Đơn hàng đã tạo</p>
+    </div>
+
+    <div class="admin-stat-card">
+        <span>Tổng khách hàng</span>
+        <strong>@Model.TongKhachHang</strong>
+        <p>Tài khoản Customer</p>
+    </div>
+
+    <div class="admin-stat-card revenue">
+        <span>Doanh thu</span>
+        <strong>@Model.TongDoanhThu.ToString("N0") đ</strong>
+        <p>Không tính đơn đã hủy</p>
+    </div>
+</div>
+
+<div class="admin-dashboard-grid">
+    <div class="admin-panel">
+        <div class="admin-panel-header">
+            <h2>Đơn hàng mới nhất</h2>
+            <a asp-area="Admin" asp-controller="Order" asp-action="Index">
+                Xem tất cả
+            </a>
+        </div>
+
+        @if (Model.DonHangMoiNhat.Any())
+        {
+            <div class="admin-table-wrap">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Mã đơn</th>
+                            <th>Khách hàng</th>
+                            <th>Ngày đặt</th>
+                            <th>Tổng tiền</th>
+                            <th>Trạng thái</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var item in Model.DonHangMoiNhat)
+                        {
+                            <tr>
+                                <td>#@item.Id</td>
+                                <td>@item.HoTenNguoiNhan</td>
+                                <td>@item.NgayDat.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>@item.TongTien.ToString("N0") đ</td>
+                                <td>
+                                    <span class="order-status">
+                                        @item.TrangThai
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="admin-empty">
+                Chưa có đơn hàng nào.
+            </div>
+        }
+    </div>
+
+    <div class="admin-panel">
+        <div class="admin-panel-header">
+            <h2>Sản phẩm sắp hết hàng</h2>
+            <a asp-area="Admin" asp-controller="Product" asp-action="Index">
+                Xem sản phẩm
+            </a>
+        </div>
+
+        @if (Model.SanPhamSapHetHang.Any())
+        {
+            <div class="low-stock-list">
+                @foreach (var item in Model.SanPhamSapHetHang)
+                {
+                    <div class="low-stock-item">
+                        <div>
+                            <strong>@item.TenSanPham</strong>
+                            <span>@(item.DanhMuc?.TenDanhMuc ?? "Chưa có danh mục")</span>
+                        </div>
+
+                        <b>Còn @item.SoLuongTon</b>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="admin-empty">
+                Chưa có sản phẩm nào sắp hết hàng.
+            </div>
+        }
+    </div>
+</div>

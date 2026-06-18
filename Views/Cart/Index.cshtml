@@ -1,0 +1,117 @@
+@model List<FashionShop.Web.Models.ViewModels.CartItemViewModel>
+
+@{
+    ViewData["Title"] = "Giỏ hàng";
+    var tongTien = Model.Sum(x => x.ThanhTien);
+}
+
+<section class="page-header">
+    <h1>Giỏ hàng của bạn</h1>
+    <p>Kiểm tra sản phẩm trước khi đặt hàng</p>
+</section>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["Success"]
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["Error"]
+    </div>
+}
+
+@if (Model.Any())
+{
+    <section class="cart-page">
+        <div class="cart-list">
+            @foreach (var item in Model)
+            {
+                <div class="cart-item">
+                    <div class="cart-item-image">
+                        @if (!string.IsNullOrEmpty(item.HinhAnh))
+                        {
+                            <img src="@item.HinhAnh" alt="@item.TenSanPham" />
+                        }
+                        else
+                        {
+                            <div class="image-placeholder">Chưa có ảnh</div>
+                        }
+                    </div>
+
+                    <div class="cart-item-info">
+                        <h3>@item.TenSanPham</h3>
+                        <p>Đơn giá: <strong>@item.Gia.ToString("N0") đ</strong></p>
+                        <p>Tồn kho: @item.SoLuongTon</p>
+
+                        <form asp-controller="Cart" asp-action="UpdateQuantity" method="post" class="cart-quantity-form">
+                            <input type="hidden" name="sanPhamId" value="@item.SanPhamId" />
+
+                            <input type="number" name="soLuong" value="@item.SoLuong" min="1" max="@item.SoLuongTon" />
+
+                            <button type="submit">Cập nhật</button>
+                        </form>
+                    </div>
+
+                    <div class="cart-item-total">
+                        <strong>@item.ThanhTien.ToString("N0") đ</strong>
+
+                        <form asp-controller="Cart" asp-action="Remove" method="post">
+                            <input type="hidden" name="sanPhamId" value="@item.SanPhamId" />
+                            <button type="submit" class="btn-remove">Xóa</button>
+                        </form>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <aside class="cart-summary">
+            <h2>Tóm tắt đơn hàng</h2>
+
+            <div class="summary-row">
+                <span>Tạm tính</span>
+                <strong>@tongTien.ToString("N0") đ</strong>
+            </div>
+
+            <div class="summary-row">
+                <span>Phí vận chuyển</span>
+                <strong>0 đ</strong>
+            </div>
+
+            <hr />
+
+            <div class="summary-total">
+                <span>Tổng cộng</span>
+                <strong>@tongTien.ToString("N0") đ</strong>
+            </div>
+
+            <a asp-controller="Order" asp-action="Checkout" class="btn-checkout">
+                Tiến hành đặt hàng
+            </a>
+
+            <form asp-controller="Cart" asp-action="Clear" method="post">
+                <button type="submit" class="btn-clear-cart">
+                    Xóa toàn bộ giỏ hàng
+                </button>
+            </form>
+
+            <a asp-controller="Product" asp-action="Index" class="continue-shopping">
+                ← Tiếp tục mua sắm
+            </a>
+        </aside>
+    </section>
+}
+else
+{
+    <div class="empty-cart">
+        <h2>Giỏ hàng đang trống</h2>
+        <p>Bạn chưa thêm sản phẩm nào vào giỏ hàng.</p>
+
+        <a asp-controller="Product" asp-action="Index" class="btn-hero">
+            Mua sắm ngay
+        </a>
+    </div>
+}

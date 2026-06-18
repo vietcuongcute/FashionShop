@@ -1,0 +1,136 @@
+@model IEnumerable<FashionShop.Web.Models.Entities.SanPham>
+
+@{
+    ViewData["Title"] = "Sản phẩm";
+    var danhMucs = ViewBag.DanhMucs as List<FashionShop.Web.Models.Entities.DanhMuc>;
+    int? categoryId = ViewBag.CategoryId as int?;
+    string keyword = ViewBag.Keyword as string ?? "";
+    string sortOrder = ViewBag.SortOrder as string ?? "";
+}
+
+<section class="page-header">
+    <h1>Sản phẩm thời trang</h1>
+    <p>Khám phá các mẫu quần áo mới nhất tại Fashion Shop</p>
+</section>
+
+<section class="product-filter-box">
+    <form asp-controller="Product" asp-action="Index" method="get" class="product-filter-form">
+        <div class="filter-group">
+            <label>Tìm kiếm</label>
+            <input type="text" name="keyword" value="@keyword" placeholder="Nhập tên sản phẩm..." />
+        </div>
+
+        <div class="filter-group">
+            <label>Danh mục</label>
+            <select name="categoryId">
+                <option value="">Tất cả danh mục</option>
+                @if (danhMucs != null)
+                {
+                    foreach (var dm in danhMucs)
+                    {
+                        if (categoryId == dm.Id)
+                        {
+                            <option value="@dm.Id" selected>@dm.TenDanhMuc</option>
+                        }
+                        else
+                        {
+                            <option value="@dm.Id">@dm.TenDanhMuc</option>
+                        }
+                    }
+                }
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label>Sắp xếp</label>
+            <select name="sortOrder">
+                @if (sortOrder == "newest")
+                {
+                    <option value="newest" selected>Mới nhất</option>
+                }
+                else
+                {
+                    <option value="newest">Mới nhất</option>
+                }
+
+                @if (sortOrder == "price_asc")
+                {
+                    <option value="price_asc" selected>Giá tăng dần</option>
+                }
+                else
+                {
+                    <option value="price_asc">Giá tăng dần</option>
+                }
+
+                @if (sortOrder == "price_desc")
+                {
+                    <option value="price_desc" selected>Giá giảm dần</option>
+                }
+                else
+                {
+                    <option value="price_desc">Giá giảm dần</option>
+                }
+            </select>
+        </div>
+
+        <button type="submit" class="btn-filter">Lọc sản phẩm</button>
+
+        <a asp-controller="Product" asp-action="Index" class="btn-reset">
+            Xóa lọc
+        </a>
+    </form>
+</section>
+
+<section class="product-section">
+    <div class="section-title">
+        <h2>Danh sách sản phẩm</h2>
+        <p>Tìm thấy @Model.Count() sản phẩm</p>
+    </div>
+
+    @if (Model.Any())
+    {
+        <div class="product-grid">
+            @foreach (var item in Model)
+            {
+                <div class="product-card">
+                    <div class="product-image">
+                        @if (!string.IsNullOrEmpty(item.HinhAnh))
+                        {
+                            <img src="@item.HinhAnh" alt="@item.TenSanPham" />
+                        }
+                        else
+                        {
+                            <div class="image-placeholder">Chưa có ảnh</div>
+                        }
+                    </div>
+
+                    <div class="product-info">
+                        <span class="product-category">
+                            @(item.DanhMuc?.TenDanhMuc ?? "Chưa có danh mục")
+                        </span>
+
+                        <h3>@item.TenSanPham</h3>
+
+                        <p class="product-desc">
+                            @item.MoTa
+                        </p>
+
+                        <div class="product-bottom">
+                            <strong>@item.Gia.ToString("N0") đ</strong>
+
+                            <a asp-controller="Product" asp-action="Details" asp-route-id="@item.Id" class="btn-detail">
+                                Xem chi tiết
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="empty-box">
+            Không tìm thấy sản phẩm phù hợp.
+        </div>
+    }
+</section>

@@ -84,13 +84,15 @@
             {
                 <div class="product-card">
                     <div class="product-image">
-                        @if (!string.IsNullOrEmpty(item.HinhAnh))
+                        @if (!string.IsNullOrWhiteSpace(item.HinhAnh))
                         {
                             <img src="@item.HinhAnh" alt="@item.TenSanPham" />
                         }
                         else
                         {
-                            <div class="image-placeholder">Chưa có ảnh</div>
+                            <div class="image-placeholder">
+                                Chưa có ảnh
+                            </div>
                         }
                     </div>
 

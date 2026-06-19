@@ -17,6 +17,20 @@
             </a>
         </div>
 
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert-success">
+                @TempData["SuccessMessage"]
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert-error">
+                @TempData["ErrorMessage"]
+            </div>
+        }
+
         <div class="customer-order-grid">
             <div class="customer-order-card">
                 <h3>Thông tin đơn hàng</h3>
@@ -56,6 +70,27 @@
                         }
                     </strong>
                 </div>
+
+                @if (Model.TrangThai == "Chờ xác nhận")
+                {
+                    <form asp-controller="Order" asp-action="Cancel" method="post" class="cancel-order-form"
+                          onsubmit="return confirm('Bạn có chắc chắn muốn hủy đơn hàng này không?');">
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden" name="id" value="@Model.Id" />
+
+                        <button type="submit" class="btn-danger">
+                            Hủy đơn hàng
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <p class="order-note">
+                        Đơn hàng này không thể hủy vì trạng thái hiện tại là:
+                        <strong>@Model.TrangThai</strong>
+                    </p>
+                }
             </div>
 
             <div class="customer-order-card">

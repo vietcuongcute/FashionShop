@@ -1,0 +1,97 @@
+@model FashionShop.Web.Models.Entities.NguoiDung
+
+@{
+    ViewData["Title"] = "Chi tiết khách hàng";
+}
+
+<div class="admin-card">
+    <div class="admin-card-header">
+        <div>
+            <h2>Chi tiết khách hàng</h2>
+            <p>Thông tin tài khoản và lịch sử đơn hàng của khách hàng.</p>
+        </div>
+
+        <a asp-action="Index" class="btn-admin-light">Quay lại</a>
+    </div>
+
+    <div class="detail-grid">
+        <div>
+            <strong>Họ tên:</strong>
+            <p>@Model.HoTen</p>
+        </div>
+
+        <div>
+            <strong>Email:</strong>
+            <p>@Model.Email</p>
+        </div>
+
+        <div>
+            <strong>Số điện thoại:</strong>
+            <p>@(Model.SoDienThoai ?? "Chưa cập nhật")</p>
+        </div>
+
+        <div>
+            <strong>Địa chỉ:</strong>
+            <p>@(Model.DiaChi ?? "Chưa cập nhật")</p>
+        </div>
+
+        <div>
+            <strong>Vai trò:</strong>
+            <p>@Model.VaiTro</p>
+        </div>
+
+        <div>
+            <strong>Tổng đơn hàng:</strong>
+            <p>@Model.DonHangs.Count</p>
+        </div>
+    </div>
+</div>
+
+<div class="admin-card">
+    <div class="admin-card-header">
+        <div>
+            <h2>Lịch sử đơn hàng</h2>
+            <p>Các đơn hàng khách hàng đã đặt.</p>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Mã đơn</th>
+                    <th>Ngày đặt</th>
+                    <th>Tổng tiền</th>
+                    <th>Trạng thái</th>
+                    <th class="text-end">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.DonHangs.Any())
+                {
+                    foreach (var item in Model.DonHangs.OrderByDescending(x => x.NgayDat))
+                    {
+                        <tr>
+                            <td>#@item.Id</td>
+                            <td>@item.NgayDat.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@item.TongTien.ToString("N0") đ</td>
+                            <td>@item.TrangThai</td>
+                            <td class="text-end">
+                                <a asp-area="Admin" asp-controller="Order" asp-action="Details" asp-route-id="@item.Id"
+                                   class="btn-admin-light">
+                                    Xem đơn
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="5" class="text-center">Khách hàng chưa có đơn hàng nào.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

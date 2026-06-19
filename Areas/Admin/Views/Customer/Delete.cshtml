@@ -1,0 +1,55 @@
+@model FashionShop.Web.Models.Entities.NguoiDung
+
+@{
+    ViewData["Title"] = "Xóa khách hàng";
+}
+
+<div class="admin-card">
+    <div class="admin-card-header">
+        <div>
+            <h2>Xóa khách hàng</h2>
+            <p>Xác nhận trước khi xóa tài khoản khách hàng.</p>
+        </div>
+
+        <a asp-action="Index" class="btn-admin-light">Quay lại</a>
+    </div>
+
+    <div class="alert-error">
+        Bạn có chắc chắn muốn xóa khách hàng <strong>@Model.HoTen</strong> không?
+    </div>
+
+    <div class="detail-grid">
+        <div>
+            <strong>Email:</strong>
+            <p>@Model.Email</p>
+        </div>
+
+        <div>
+            <strong>Số điện thoại:</strong>
+            <p>@(Model.SoDienThoai ?? "Chưa cập nhật")</p>
+        </div>
+
+        <div>
+            <strong>Số đơn hàng:</strong>
+            <p>@Model.DonHangs.Count</p>
+        </div>
+    </div>
+
+    @if (Model.DonHangs.Any())
+    {
+        <div class="alert-error">
+            Không nên xóa khách hàng này vì đã có đơn hàng trong hệ thống.
+        </div>
+    }
+    else
+    {
+        <form asp-action="DeleteConfirmed" method="post">
+            <input type="hidden" name="id" value="@Model.Id" />
+
+            <div class="form-actions">
+                <button type="submit" class="btn-admin-danger">Xác nhận xóa</button>
+                <a asp-action="Index" class="btn-admin-light">Hủy</a>
+            </div>
+        </form>
+    }
+</div>

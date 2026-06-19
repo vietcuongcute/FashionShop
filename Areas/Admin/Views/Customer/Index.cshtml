@@ -1,0 +1,76 @@
+@model List<FashionShop.Web.Models.Entities.NguoiDung>
+
+@{
+    ViewData["Title"] = "Quản lý khách hàng";
+}
+
+<div class="admin-card">
+    <div class="admin-card-header">
+        <div>
+            <h2>Quản lý khách hàng</h2>
+            <p>Danh sách tài khoản khách hàng đã đăng ký trong hệ thống.</p>
+        </div>
+    </div>
+
+    <form asp-action="Index" method="get" class="admin-filter-form">
+        <input type="text" name="keyword" value="@ViewBag.Keyword"
+               placeholder="Tìm theo tên, email hoặc số điện thoại..." />
+
+        <button type="submit" class="btn-admin-primary">Tìm kiếm</button>
+
+        <a asp-action="Index" class="btn-admin-light">Làm mới</a>
+    </form>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert-success">@TempData["SuccessMessage"]</div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert-error">@TempData["ErrorMessage"]</div>
+    }
+
+    <div class="table-responsive">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Mã</th>
+                    <th>Họ tên</th>
+                    <th>Email</th>
+                    <th>Số điện thoại</th>
+                    <th>Địa chỉ</th>
+                    <th>Số đơn hàng</th>
+                    <th class="text-end">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Any())
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>#@item.Id</td>
+                            <td>@item.HoTen</td>
+                            <td>@item.Email</td>
+                            <td>@(item.SoDienThoai ?? "Chưa cập nhật")</td>
+                            <td>@(item.DiaChi ?? "Chưa cập nhật")</td>
+                            <td>@item.DonHangs.Count</td>
+                            <td class="text-end">
+                                <a asp-action="Details" asp-route-id="@item.Id" class="btn-admin-light">Chi tiết</a>
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn-admin-warning">Sửa</a>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn-admin-danger">Xóa</a>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7" class="text-center">Chưa có khách hàng nào.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -201,7 +201,61 @@ namespace FashionShop.Web.Controllers
 
             return View(donHang);
         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Cancel(int id)
+        {
+            var userId = HttpContext.Session.GetInt32("UserId");
 
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var donHang = await _context.DonHangs
+                .Include(x => x.ChiTietDonHangs)
+                .ThenInclude(x => x.SanPham)
+                .FirstOrDefaultAsync(x => x.Id == id && x.NguoiDungId == userId.Value);
+
+            if (donHang == null)
+            {
+                return NotFound();
+            }
+
+            if (donHang.TrangThai != "Chờ xác nhận")
+            {
+                TempData["ErrorMessage"] = "Chỉ có thể hủy đơn hàng khi đơn còn ở trạng thái Chờ xác nhận.";
+                return RedirectToAction(nameof(Details), new { id = donHang.Id });
+            }
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
+
+            try
+            {
+                donHang.TrangThai = "Đã hủy";
+
+                foreach (var item in donHang.ChiTietDonHangs)
+                {
+                    if (item.SanPham != null)
+                    {
+                        item.SanPham.SoLuongTon += item.SoLuong;
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                TempData["SuccessMessage"] = "Hủy đơn hàng thành công.";
+                return RedirectToAction(nameof(Details), new { id = donHang.Id });
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi hủy đơn hàng. Vui lòng thử lại.";
+                return RedirectToAction(nameof(Details), new { id = donHang.Id });
+            }
+        }
         private List<CartItemViewModel> GetCart()
         {
             var cart = HttpContext.Session.GetObject<List<CartItemViewModel>>(CartSessionKey);

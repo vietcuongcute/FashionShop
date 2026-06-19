@@ -51,8 +51,8 @@ namespace FashionShop.Web.Controllers
 
             var nguoiDung = new NguoiDung
             {
-                HoTen = model.HoTen,
-                Email = model.Email,
+                HoTen = model.HoTen.Trim(),
+                Email = model.Email.Trim(),
                 MatKhau = model.MatKhau,
                 SoDienThoai = model.SoDienThoai,
                 DiaChi = model.DiaChi,
@@ -68,19 +68,20 @@ namespace FashionShop.Web.Controllers
         }
 
         [HttpGet]
-        public IActionResult Login()
+        public IActionResult Login(string? returnUrl = null)
         {
             if (IsLoggedIn())
             {
                 return RedirectToAction("Index", "Home");
             }
 
+            ViewBag.ReturnUrl = returnUrl;
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model)
+        public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null)
         {
             if (IsLoggedIn())
             {
@@ -89,15 +90,18 @@ namespace FashionShop.Web.Controllers
 
             if (!ModelState.IsValid)
             {
+                ViewBag.ReturnUrl = returnUrl;
                 return View(model);
             }
 
+            var email = model.Email.Trim();
             var nguoiDung = await _context.NguoiDungs
-                .FirstOrDefaultAsync(x => x.Email == model.Email && x.MatKhau == model.MatKhau);
+                .FirstOrDefaultAsync(x => x.Email == email && x.MatKhau == model.MatKhau);
 
             if (nguoiDung == null)
             {
                 ModelState.AddModelError("", "Email hoặc mật khẩu không đúng.");
+                ViewBag.ReturnUrl = returnUrl;
                 return View(model);
             }
 
@@ -106,12 +110,100 @@ namespace FashionShop.Web.Controllers
             HttpContext.Session.SetString("UserEmail", nguoiDung.Email);
             HttpContext.Session.SetString("UserRole", nguoiDung.VaiTro);
 
+            if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
+            {
+                return Redirect(returnUrl);
+            }
+
             if (nguoiDung.VaiTro == "Admin")
             {
                 return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
             }
 
             return RedirectToAction("Index", "Home");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Profile()
+        {
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null)
+            {
+                return RedirectToAction(nameof(Login), new { returnUrl = Url.Action(nameof(Profile), "Account") });
+            }
+
+            var user = await _context.NguoiDungs.FindAsync(userId.Value);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            return View(user);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Profile(NguoiDung model)
+        {
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null)
+            {
+                return RedirectToAction(nameof(Login));
+            }
+
+            var user = await _context.NguoiDungs.FindAsync(userId.Value);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            ModelState.Remove("MatKhau");
+            ModelState.Remove("VaiTro");
+            ModelState.Remove("DonHangs");
+
+            if (string.IsNullOrWhiteSpace(model.HoTen))
+            {
+                ModelState.AddModelError("HoTen", "Họ tên không được để trống.");
+            }
+
+            if (string.IsNullOrWhiteSpace(model.Email))
+            {
+                ModelState.AddModelError("Email", "Email không được để trống.");
+            }
+            else
+            {
+                var emailTrung = await _context.NguoiDungs.AnyAsync(x => x.Id != user.Id && x.Email == model.Email);
+                if (emailTrung)
+                {
+                    ModelState.AddModelError("Email", "Email này đã được sử dụng.");
+                }
+            }
+
+            if (!ModelState.IsValid)
+            {
+                model.Id = user.Id;
+                model.VaiTro = user.VaiTro;
+                model.MatKhau = user.MatKhau;
+                return View(model);
+            }
+
+            user.HoTen = model.HoTen.Trim();
+            user.Email = model.Email.Trim();
+            user.SoDienThoai = model.SoDienThoai;
+            user.DiaChi = model.DiaChi;
+
+            if (!string.IsNullOrWhiteSpace(model.MatKhau))
+            {
+                user.MatKhau = model.MatKhau;
+            }
+
+            await _context.SaveChangesAsync();
+
+            HttpContext.Session.SetString("UserName", user.HoTen);
+            HttpContext.Session.SetString("UserEmail", user.Email);
+            TempData["Success"] = "Cập nhật hồ sơ thành công.";
+
+            return RedirectToAction(nameof(Profile));
         }
 
         [HttpPost]

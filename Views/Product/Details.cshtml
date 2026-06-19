@@ -1,117 +1,84 @@
-@model FashionShop.Web.Models.Entities.SanPham
-
+@model SanPham
 @{
     ViewData["Title"] = Model.TenSanPham;
-    var sanPhamLienQuan = ViewBag.SanPhamLienQuan as List<FashionShop.Web.Models.Entities.SanPham>;
+    var sanPhamLienQuan = ViewBag.SanPhamLienQuan as List<SanPham> ?? new List<SanPham>();
+    var returnUrl = Context.Request.Path.ToString() + Context.Request.QueryString.ToString();
+    var imageUrl = FashionImageHelper.GetProductImage(Model.HinhAnh, Model.TenSanPham, Model.DanhMuc?.TenDanhMuc);
 }
 
-<section class="product-detail-page">
-    <div class="product-detail-image">
-        @if (!string.IsNullOrEmpty(Model.HinhAnh))
+<section class="container product-detail-layout product-detail-refined">
+    <div class="detail-gallery reveal">
+        <img src="@imageUrl" alt="@Model.TenSanPham" />
+    </div>
+
+    <div class="detail-info reveal delay-1">
+        <a class="back-link" asp-controller="Product" asp-action="Index">← Quay lại cửa hàng</a>
+        <span class="detail-category">@(Model.DanhMuc?.TenDanhMuc ?? "VyAnhFashion")</span>
+        <h1>@Model.TenSanPham</h1>
+        <div class="detail-price">@Model.Gia.ToString("N0") đ</div>
+        <p class="detail-description">@(string.IsNullOrWhiteSpace(Model.MoTa) ? "Thiết kế được chọn theo tinh thần tối giản, dễ phối và phù hợp với tủ đồ hiện đại." : Model.MoTa)</p>
+
+        <div class="detail-option-grid">
+            <div><span>Trạng thái</span><strong>@(Model.SoLuongTon > 0 ? "Còn hàng" : "Hết hàng")</strong></div>
+            <div><span>Tồn kho</span><strong>@Model.SoLuongTon sản phẩm</strong></div>
+            <div><span>Đổi trả</span><strong>7 ngày</strong></div>
+            <div><span>Thanh toán</span><strong>COD / Bank / MoMo</strong></div>
+        </div>
+
+        <div class="detail-highlight-box">
+            <div>
+                <strong>Fabric note</strong>
+                <span>Ưu tiên form đẹp, dễ mặc và chụp hình.</span>
+            </div>
+            <div>
+                <strong>Styling tip</strong>
+                <span>Mix cùng blazer, túi mini hoặc quần suông để lên set hoàn chỉnh.</span>
+            </div>
+        </div>
+
+        @if (Model.SoLuongTon > 0)
         {
-            <img src="@Model.HinhAnh" alt="@Model.TenSanPham" />
+            <form asp-controller="Cart" asp-action="AddToCart" method="post" class="detail-buy-form">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="sanPhamId" value="@Model.Id" />
+                <input type="hidden" name="returnUrl" value="@returnUrl" />
+                <label>Số lượng <input type="number" name="soLuong" value="1" min="1" max="@Model.SoLuongTon" /></label>
+                <button type="submit" class="btn-solid">Thêm vào giỏ hàng</button>
+            </form>
         }
         else
         {
-            <div class="image-placeholder detail-placeholder">Chưa có ảnh</div>
+            <button class="btn-solid" disabled>Hết hàng</button>
         }
-    </div>
 
-    <div class="product-detail-info">
-        <span class="product-category">
-            @(Model.DanhMuc?.TenDanhMuc ?? "Chưa có danh mục")
-        </span>
-
-        <h1>@Model.TenSanPham</h1>
-
-        <div class="detail-price">
-            @Model.Gia.ToString("N0") đ
-        </div>
-
-        <div class="detail-stock">
-            @if (Model.SoLuongTon > 0)
-            {
-                <span class="in-stock">Còn hàng: @Model.SoLuongTon sản phẩm</span>
-            }
-            else
-            {
-                <span class="out-stock">Hết hàng</span>
-            }
-        </div>
-
-        <p class="detail-desc">
-            @Model.MoTa
-        </p>
-
-        <form asp-controller="Cart" asp-action="AddToCart" method="post" class="add-cart-form">
+        <form asp-controller="Wishlist" asp-action="Toggle" method="post" class="wishlist-detail-form">
+            @Html.AntiForgeryToken()
             <input type="hidden" name="sanPhamId" value="@Model.Id" />
-
-            <div class="quantity-box">
-                <label>Số lượng</label>
-                <input type="number" name="soLuong" value="1" min="1" max="@Model.SoLuongTon" />
-            </div>
-
-            @if (Model.SoLuongTon > 0)
-            {
-                <button type="submit" class="btn-add-cart">
-                    Thêm vào giỏ hàng
-                </button>
-            }
-            else
-            {
-                <button type="button" class="btn-add-cart disabled" disabled>
-                    Hết hàng
-                </button>
-            }
+            <input type="hidden" name="returnUrl" value="@returnUrl" />
+            <button type="submit">♡ Lưu vào yêu thích</button>
         </form>
 
-        <a asp-controller="Product" asp-action="Index" class="back-link">
-            ← Quay lại danh sách sản phẩm
-        </a>
+        <div class="detail-service-box">
+            <p><strong>Delivery:</strong> Miễn phí giao hàng cho đơn từ 499K và hỗ trợ xác nhận đơn nhanh.</p>
+            <p><strong>Experience:</strong> Wishlist là dữ liệu riêng của người dùng; tài khoản admin không thấy được danh sách này.</p>
+        </div>
     </div>
 </section>
 
-@if (sanPhamLienQuan != null && sanPhamLienQuan.Any())
+@if (sanPhamLienQuan.Any())
 {
-    <section class="related-section">
-        <div class="section-title">
-            <h2>Sản phẩm liên quan</h2>
-            <p>Các sản phẩm cùng danh mục</p>
+    <section class="container section-area">
+        <div class="section-title reveal">
+            <div>
+                <span>Related edit</span>
+                <h2>Có thể bạn cũng thích</h2>
+            </div>
+            <a asp-controller="Product" asp-action="Index">Xem thêm</a>
         </div>
-
-        <div class="product-grid">
+        <div class="product-grid related-grid">
             @foreach (var item in sanPhamLienQuan)
             {
-                <div class="product-card">
-                    <div class="product-image">
-                        @if (!string.IsNullOrWhiteSpace(item.HinhAnh))
-                        {
-                            <img src="@item.HinhAnh" alt="@item.TenSanPham" />
-                        }
-                        else
-                        {
-                            <div class="image-placeholder">
-                                Chưa có ảnh
-                            </div>
-                        }
-                    </div>
-
-                    <div class="product-info">
-                        <span class="product-category">
-                            @(item.DanhMuc?.TenDanhMuc ?? "Chưa có danh mục")
-                        </span>
-
-                        <h3>@item.TenSanPham</h3>
-
-                        <div class="product-bottom">
-                            <strong>@item.Gia.ToString("N0") đ</strong>
-
-                            <a asp-controller="Product" asp-action="Details" asp-route-id="@item.Id" class="btn-detail">
-                                Xem chi tiết
-                            </a>
-                        </div>
-                    </div>
-                </div>
+                <partial name="~/Views/Shared/_ProductCard.cshtml" model="item" />
             }
         </div>
     </section>

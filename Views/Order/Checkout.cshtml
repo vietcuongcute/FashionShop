@@ -1,80 +1,50 @@
-@model FashionShop.Web.Models.ViewModels.CheckoutViewModel
-
+@model CheckoutViewModel
 @{
     ViewData["Title"] = "Thanh toán";
 }
 
-<section class="page-header">
-    <h1>Thanh toán</h1>
-    <p>Nhập thông tin giao hàng để hoàn tất đơn hàng</p>
+<section class="page-hero compact cream-hero">
+    <div class="container reveal">
+        <span>Checkout</span>
+        <h1>Secure checkout</h1>
+        <p>Nhập thông tin nhận hàng, chọn phương thức thanh toán và hoàn tất đơn hàng trong vài bước ngắn gọn.</p>
+    </div>
 </section>
 
-<form asp-controller="Order" asp-action="Checkout" method="post">
-    @Html.AntiForgeryToken()
-
-    <section class="checkout-page">
-        <div class="checkout-form-box">
+<section class="container checkout-layout">
+    <div class="form-card reveal">
+        <div class="form-title">
             <h2>Thông tin giao hàng</h2>
-
-            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-
-            <div class="form-group-custom">
-                <label asp-for="HoTenNguoiNhan">Họ tên người nhận</label>
-                <input asp-for="HoTenNguoiNhan" placeholder="Nhập họ tên người nhận" />
-                <span asp-validation-for="HoTenNguoiNhan" class="text-danger"></span>
-            </div>
-
-            <div class="form-group-custom">
-                <label asp-for="SoDienThoai">Số điện thoại</label>
-                <input asp-for="SoDienThoai" placeholder="Nhập số điện thoại" />
-                <span asp-validation-for="SoDienThoai" class="text-danger"></span>
-            </div>
-
-            <div class="form-group-custom">
-                <label asp-for="DiaChiGiaoHang">Địa chỉ giao hàng</label>
-                <textarea asp-for="DiaChiGiaoHang" rows="4" placeholder="Nhập địa chỉ giao hàng"></textarea>
-                <span asp-validation-for="DiaChiGiaoHang" class="text-danger"></span>
-            </div>
-
-            <div class="form-group-custom">
-                <label asp-for="GhiChu">Ghi chú</label>
-                <textarea asp-for="GhiChu" rows="3" placeholder="Ghi chú thêm cho đơn hàng nếu có"></textarea>
-            </div>
+            <p>Kiểm tra kỹ số điện thoại và địa chỉ để đơn hàng được giao chính xác.</p>
         </div>
+        <form asp-controller="Order" asp-action="Checkout" method="post">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            <div class="field"><label asp-for="HoTenNguoiNhan">Người nhận</label><input asp-for="HoTenNguoiNhan" placeholder="Họ tên người nhận" /><span asp-validation-for="HoTenNguoiNhan" class="text-danger"></span></div>
+            <div class="field"><label asp-for="SoDienThoai">Số điện thoại</label><input asp-for="SoDienThoai" placeholder="Số điện thoại" /><span asp-validation-for="SoDienThoai" class="text-danger"></span></div>
+            <div class="field"><label asp-for="DiaChiGiaoHang">Địa chỉ</label><textarea asp-for="DiaChiGiaoHang" rows="4" placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành"></textarea><span asp-validation-for="DiaChiGiaoHang" class="text-danger"></span></div>
+            <div class="field"><label asp-for="PhuongThucThanhToan">Thanh toán</label><select asp-for="PhuongThucThanhToan"><option value="COD">Thanh toán khi nhận hàng</option><option value="Bank">Chuyển khoản ngân hàng</option><option value="Momo">Ví MoMo</option></select><span asp-validation-for="PhuongThucThanhToan" class="text-danger"></span></div>
+            <div class="field"><label asp-for="GhiChu">Ghi chú</label><textarea asp-for="GhiChu" rows="3" placeholder="Ví dụ: giao giờ hành chính hoặc gọi trước khi giao"></textarea><span asp-validation-for="GhiChu" class="text-danger"></span></div>
+            <button type="submit" class="btn-solid full-width">Đặt hàng ngay</button>
+        </form>
+    </div>
 
-        <aside class="checkout-summary">
-            <h2>Đơn hàng của bạn</h2>
-
-            @foreach (var item in Model.CartItems)
-            {
-                <div class="checkout-item">
-                    <div>
-                        <strong>@item.TenSanPham</strong>
-                        <p>Số lượng: @item.SoLuong</p>
-                    </div>
-
-                    <span>@item.ThanhTien.ToString("N0") đ</span>
-                </div>
-            }
-
-            <hr />
-
-            <div class="summary-total">
-                <span>Tổng thanh toán</span>
-                <strong>@Model.TongTien.ToString("N0") đ</strong>
+    <aside class="summary-card checkout-summary reveal delay-1">
+        <h2>Order summary</h2>
+        @foreach (var item in Model.CartItems)
+        {
+            <div class="summary-line product-line">
+                <span>@item.TenSanPham x @item.SoLuong</span>
+                <strong>@item.ThanhTien.ToString("N0") đ</strong>
             </div>
+        }
+        <div class="summary-total"><span>Tổng tiền</span><strong>@Model.TongTien.ToString("N0") đ</strong></div>
+        <div class="mini-policy">
+            <p>✓ Đơn sẽ ở trạng thái <strong>Chờ xác nhận</strong> sau khi đặt.</p>
+            <p>✓ Hệ thống tự trừ kho khi đơn hàng thành công.</p>
+            <p>✓ Theo dõi trạng thái trong mục <strong>Đơn hàng của tôi</strong>.</p>
+        </div>
+    </aside>
+</section>
 
-            <button type="submit" class="btn-place-order">
-                Xác nhận đặt hàng
-            </button>
-
-            <a asp-controller="Cart" asp-action="Index" class="continue-shopping">
-                ← Quay lại giỏ hàng
-            </a>
-        </aside>
-    </section>
-</form>
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

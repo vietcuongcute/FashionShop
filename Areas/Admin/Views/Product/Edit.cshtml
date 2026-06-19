@@ -58,7 +58,7 @@
             <div class="form-group">
                 <label>Ảnh hiện tại</label>
                 <div>
-                    <img src="@Model.HinhAnh" alt="@Model.TenSanPham" class="preview-product-img" />
+                    <img src="@FashionImageHelper.GetProductImage(Model.HinhAnh, Model.TenSanPham, Model.DanhMuc?.TenDanhMuc)" alt="@Model.TenSanPham" class="preview-product-img" />
                 </div>
             </div>
         }

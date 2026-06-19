@@ -1,125 +1,168 @@
-﻿@using Microsoft.AspNetCore.Http
-
+@using Microsoft.AspNetCore.Http
+@using FashionShop.Web.Extensions
+@using FashionShop.Web.Models.ViewModels
+@{
+    var cart = Context.Session.GetObject<List<CartItemViewModel>>("FashionShopCart") ?? new List<CartItemViewModel>();
+    var wishlist = Context.Session.GetObject<List<int>>("FashionShopWishlist") ?? new List<int>();
+    var cartCount = cart.Sum(x => x.SoLuong);
+    var wishlistCount = wishlist.Count;
+    var userName = Context.Session.GetString("UserName");
+    var role = Context.Session.GetString("UserRole");
+    var isAdmin = role == "Admin";
+}
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - FashionShop</title>
-
+    <title>@ViewData["Title"] - VyAnhFashion</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/FashionShop.Web.styles.css" asp-append-version="true" />
 </head>
-
-<body>
-    <header>
-        <nav
-            class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3 fashion-navbar">
-            <div class="container">
-                <a class="navbar-brand fw-bold" asp-area="" asp-controller="Home" asp-action="Index">
-                    FashionShop
-                </a>
-
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
-                        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">
-                                Trang chủ
-                            </a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Product" asp-action="Index">
-                                Sản phẩm
-                            </a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Cart" asp-action="Index">
-                                Giỏ hàng
-                            </a>
-                        </li>
-
-                        @if (Context.Session.GetString("UserRole") == "Admin")
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="Admin" asp-controller="Dashboard"
-                                   asp-action="Index">
-                                    Admin
-                                </a>
-                            </li>
-                        }
-                    </ul>
-
-                    <ul class="navbar-nav ms-auto align-items-sm-center">
-                        @if (Context.Session.GetInt32("UserId") != null)
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Order" asp-action="History">
-                                    Đơn hàng của tôi
-                                </a>
-                            </li>
-
-                            <li class="nav-item">
-                                <span class="nav-link text-dark">
-                                    Xin chào, <strong>@Context.Session.GetString("UserName")</strong>
-                                </span>
-                            </li>
-
-                            <li class="nav-item">
-                                <form asp-area="" asp-controller="Account" asp-action="Logout" method="post"
-                                      class="d-inline">
-                                    @Html.AntiForgeryToken()
-                                    <button type="submit" class="btn btn-link nav-link text-dark logout-link">
-                                        Đăng xuất
-                                    </button>
-                                </form>
-                            </li>
-                        }
-                        else
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Login">
-                                    Đăng nhập
-                                </a>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Register">
-                                    Đăng ký
-                                </a>
-                            </li>
-                        }
-                    </ul>
-                </div>
-            </div>
-        </nav>
-    </header>
-
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+<body class="site-body">
+    <div class="announcement-bar">
+        <div class="container announcement-inner">
+            <span>NEW SEASON · ELEVATED EVERYDAY STYLE</span>
+            <span>FREESHIP TOÀN QUỐC CHO ĐƠN TỪ 499K</span>
+            <span>MÃ CHÀO MỪNG: VYANH10</span>
+        </div>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - FashionShop
+    <header class="main-header" id="mainHeader">
+        <div class="container nav-shell">
+            <a class="brand" asp-area="" asp-controller="Home" asp-action="Index">
+                <span class="brand-mark">VyAnhFashion</span>
+                <small>modern wardrobe</small>
+            </a>
+
+            <button class="navbar-toggler nav-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span></span><span></span><span></span>
+            </button>
+
+            <div class="collapse navbar-collapse shop-collapse" id="mainNav">
+                <nav class="nav-links">
+                    <a asp-area="" asp-controller="Home" asp-action="Index">Trang chủ</a>
+                    <a asp-area="" asp-controller="Product" asp-action="Index" asp-route-sortOrder="newest">New in</a>
+                    <a asp-area="" asp-controller="Product" asp-action="Index">Shop</a>
+                    <a asp-area="" asp-controller="Product" asp-action="Index" asp-route-keyword="áo">Tops</a>
+                    <a asp-area="" asp-controller="Product" asp-action="Index" asp-route-keyword="váy">Dresses</a>
+                    <a asp-area="" asp-controller="Product" asp-action="Index" asp-route-keyword="quần">Bottoms</a>
+                    <a asp-area="" asp-controller="Product" asp-action="Index" asp-route-keyword="khoác">Outerwear</a>
+                    <a asp-area="" asp-controller="Home" asp-action="Contact">Contact</a>
+                    @if (isAdmin)
+                    {
+                        <a class="admin-nav-link" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Admin</a>
+                    }
+                </nav>
+
+                <div class="header-actions">
+                    @if (!isAdmin)
+                    {
+                        <form class="header-search" asp-area="" asp-controller="Product" asp-action="Index" method="get">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.75 18.5a7.75 7.75 0 1 1 0-15.5 7.75 7.75 0 0 1 0 15.5Zm0-2a5.75 5.75 0 1 0 0-11.5 5.75 5.75 0 0 0 0 11.5Zm6.1-.05 4.15 4.14-1.41 1.41-4.15-4.14 1.41-1.41Z"/></svg>
+                            <input type="search" name="keyword" placeholder="Tìm blazer, váy, phụ kiện..." />
+                        </form>
+
+                        <a class="icon-btn" asp-area="" asp-controller="Wishlist" asp-action="Index" aria-label="Yêu thích">
+                            <svg viewBox="0 0 24 24"><path d="M12 20.7 10.55 19.4C5.4 14.75 2 11.7 2 7.95 2 4.9 4.4 2.5 7.45 2.5c1.72 0 3.38.8 4.55 2.05A6.08 6.08 0 0 1 16.55 2.5C19.6 2.5 22 4.9 22 7.95c0 3.75-3.4 6.8-8.55 11.45L12 20.7Z" /></svg>
+                            @if (wishlistCount > 0) { <span class="count-badge">@wishlistCount</span> }
+                        </a>
+                        <a class="icon-btn" asp-area="" asp-controller="Cart" asp-action="Index" aria-label="Giỏ hàng">
+                            <svg viewBox="0 0 24 24"><path d="M7 7V6a5 5 0 0 1 10 0v1h2.3l1.2 13H3.5L4.7 7H7Zm2 0h6V6a3 3 0 1 0-6 0v1Z" /></svg>
+                            @if (cartCount > 0) { <span class="count-badge">@cartCount</span> }
+                        </a>
+                    }
+
+                    @if (!string.IsNullOrWhiteSpace(userName))
+                    {
+                        <div class="dropdown account-dropdown">
+                            <a class="account-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">@userName</a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                @if (isAdmin)
+                                {
+                                    <li><a class="dropdown-item" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Dashboard admin</a></li>
+                                }
+                                else
+                                {
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Order" asp-action="History">Đơn hàng của tôi</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Wishlist" asp-action="Index">Yêu thích</a></li>
+                                }
+                                <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Profile">Hồ sơ</a></li>
+                                <li><hr class="dropdown-divider" /></li>
+                                <li>
+                                    <form asp-area="" asp-controller="Account" asp-action="Logout" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="dropdown-item text-danger">Đăng xuất</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    }
+                    else
+                    {
+                        <a class="login-btn" asp-area="" asp-controller="Account" asp-action="Login">Đăng nhập</a>
+                    }
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        @if (TempData["Success"] != null) { <div class="container flash-wrap"><div class="flash success modern-alert">@TempData["Success"]</div></div> }
+        @if (TempData["Error"] != null) { <div class="container flash-wrap"><div class="flash error modern-alert">@TempData["Error"]</div></div> }
+        @if (TempData["SuccessMessage"] != null) { <div class="container flash-wrap"><div class="flash success modern-alert">@TempData["SuccessMessage"]</div></div> }
+        @if (TempData["ErrorMessage"] != null) { <div class="container flash-wrap"><div class="flash error modern-alert">@TempData["ErrorMessage"]</div></div> }
+        @RenderBody()
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-grid">
+            <div class="footer-brand">
+                <h3>VyAnhFashion</h3>
+                <p>Thương hiệu thời trang theo tinh thần hiện đại, nữ tính và dễ ứng dụng. Chúng mình tập trung vào trải nghiệm mua sắm mượt, hình ảnh chỉn chu và cảm giác như một website ecommerce thực tế.</p>
+                <div class="socials"><span>IG</span><span>FB</span><span>TT</span><span>YT</span></div>
+            </div>
+            <div>
+                <h4>Shop</h4>
+                <a asp-controller="Product" asp-action="Index">Tất cả sản phẩm</a>
+                <a asp-controller="Product" asp-action="Index" asp-route-sortOrder="newest">New arrivals</a>
+                <a asp-controller="Product" asp-action="Index" asp-route-sortOrder="featured">Best sellers</a>
+                <a asp-controller="Product" asp-action="Index" asp-route-sortOrder="price_asc">Sale picks</a>
+            </div>
+            <div>
+                <h4>Support</h4>
+                <a asp-controller="Home" asp-action="Contact">Liên hệ</a>
+                <a asp-controller="Order" asp-action="History">Theo dõi đơn</a>
+                <a asp-controller="Home" asp-action="About">Về chúng tôi</a>
+                <a asp-controller="Account" asp-action="Profile">Tài khoản</a>
+            </div>
+            <div class="newsletter">
+                <h4>Join the club</h4>
+                <p>Nhận thông tin bộ sưu tập mới, ưu đãi thành viên và gợi ý mix & match.</p>
+                <form>
+                    <input type="email" placeholder="Email của bạn" />
+                    <button type="button">Đăng ký</button>
+                </form>
+            </div>
+        </div>
+        <div class="container footer-bottom">
+            <span>© 2026 VyAnhFashion. All rights reserved.</span>
+            <div>
+                <span>Privacy Policy</span>
+                <span>·</span>
+                <span>Terms & Conditions</span>
+                <span>·</span>
+                <span>Wishlist là dữ liệu riêng của user, admin không xem được.</span>
+            </div>
         </div>
     </footer>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-
     @await RenderSectionAsync("Scripts", required: false)
 </body>
-
 </html>

@@ -1,119 +1,72 @@
-@model List<FashionShop.Web.Models.ViewModels.CartItemViewModel>
-
+@model List<CartItemViewModel>
 @{
     ViewData["Title"] = "Giỏ hàng";
-    var tongTien = Model.Sum(x => x.ThanhTien);
+    var total = Model.Sum(x => x.ThanhTien);
+    var shipping = total >= 499000 || total == 0 ? 0 : 30000;
 }
 
-<section class="page-header">
-    <h1>Giỏ hàng của bạn</h1>
-    <p>Kiểm tra sản phẩm trước khi đặt hàng</p>
+<section class="page-hero compact cream-hero">
+    <div class="container reveal">
+        <span>Shopping bag</span>
+        <h1>Your shopping bag</h1>
+        <p>Xem lại sản phẩm đã chọn, số lượng, ưu đãi giao hàng và tổng thanh toán trước khi tiếp tục checkout.</p>
+    </div>
 </section>
 
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success">
-        @TempData["Success"]
-    </div>
-}
-
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger">
-        @TempData["Error"]
-    </div>
-}
-
-@if (Model.Any())
-{
-    <section class="cart-page">
-        <div class="cart-list">
+<section class="container cart-layout">
+    @if (Model.Any())
+    {
+        <div class="cart-list reveal">
             @foreach (var item in Model)
             {
-                <div class="cart-item">
-                    <div class="cart-item-image">
-                        @if (!string.IsNullOrWhiteSpace(item.HinhAnh))
-                        {
-                            <img src="@item.HinhAnh" alt="@item.TenSanPham" class="cart-product-img" />
-                        }
-                        else
-                        {
-                            <div class="cart-product-img no-image">
-                                No image
-                            </div>
-                        }
+                var imageUrl = FashionImageHelper.GetProductImage(item.HinhAnh, item.TenSanPham);
+                <article class="cart-item">
+                    <div class="cart-product">
+                        <img src="@imageUrl" alt="@item.TenSanPham" />
+                        <div>
+                            <h3>@item.TenSanPham</h3>
+                            <p>@item.Gia.ToString("N0") đ</p>
+                            <small>Còn @item.SoLuongTon sản phẩm</small>
+                        </div>
                     </div>
-
-                    <div class="cart-item-info">
-                        <h3>@item.TenSanPham</h3>
-                        <p>Đơn giá: <strong>@item.Gia.ToString("N0") đ</strong></p>
-                        <p>Tồn kho: @item.SoLuongTon</p>
-
-                        <form asp-controller="Cart" asp-action="UpdateQuantity" method="post" class="cart-quantity-form">
+                    <div class="cart-actions">
+                        <form asp-controller="Cart" asp-action="UpdateQuantity" method="post" class="qty-form">
+                            @Html.AntiForgeryToken()
                             <input type="hidden" name="sanPhamId" value="@item.SanPhamId" />
-
-                            <input type="number" name="soLuong" value="@item.SoLuong" min="1" max="@item.SoLuongTon" />
-
-                            <button type="submit">Cập nhật</button>
+                            <input type="number" name="soLuong" value="@item.SoLuong" min="0" max="@item.SoLuongTon" />
+                            <button type="submit" class="btn-soft">Cập nhật</button>
                         </form>
-                    </div>
-
-                    <div class="cart-item-total">
                         <strong>@item.ThanhTien.ToString("N0") đ</strong>
-
                         <form asp-controller="Cart" asp-action="Remove" method="post">
+                            @Html.AntiForgeryToken()
                             <input type="hidden" name="sanPhamId" value="@item.SanPhamId" />
-                            <button type="submit" class="btn-remove">Xóa</button>
+                            <button type="submit" class="remove-link">Xóa</button>
                         </form>
                     </div>
-                </div>
+                </article>
             }
         </div>
 
-        <aside class="cart-summary">
-            <h2>Tóm tắt đơn hàng</h2>
-
-            <div class="summary-row">
-                <span>Tạm tính</span>
-                <strong>@tongTien.ToString("N0") đ</strong>
+        <aside class="summary-card reveal delay-1">
+            <h2>Order summary</h2>
+            <div class="summary-line"><span>Tạm tính</span><strong>@total.ToString("N0") đ</strong></div>
+            <div class="summary-line"><span>Phí vận chuyển</span><strong>@(shipping == 0 ? "Miễn phí" : shipping.ToString("N0") + " đ")</strong></div>
+            <div class="summary-total"><span>Tổng thanh toán</span><strong>@((total + shipping).ToString("N0")) đ</strong></div>
+            <a asp-controller="Order" asp-action="Checkout" class="btn-solid full-width">Tiến hành thanh toán</a>
+            <a asp-controller="Product" asp-action="Index" class="btn-outline-dark full-width">Tiếp tục mua sắm</a>
+            <div class="mini-policy">
+                <p>✓ Freeship cho đơn từ 499K</p>
+                <p>✓ Hỗ trợ đổi trả trong 7 ngày</p>
+                <p>✓ Quy trình thanh toán bảo mật, nhanh gọn</p>
             </div>
-
-            <div class="summary-row">
-                <span>Phí vận chuyển</span>
-                <strong>0 đ</strong>
-            </div>
-
-            <hr />
-
-            <div class="summary-total">
-                <span>Tổng cộng</span>
-                <strong>@tongTien.ToString("N0") đ</strong>
-            </div>
-
-            <a asp-controller="Order" asp-action="Checkout" class="btn-checkout">
-                Tiến hành đặt hàng
-            </a>
-
-            <form asp-controller="Cart" asp-action="Clear" method="post">
-                <button type="submit" class="btn-clear-cart">
-                    Xóa toàn bộ giỏ hàng
-                </button>
-            </form>
-
-            <a asp-controller="Product" asp-action="Index" class="continue-shopping">
-                ← Tiếp tục mua sắm
-            </a>
         </aside>
-    </section>
-}
-else
-{
-    <div class="empty-cart">
-        <h2>Giỏ hàng đang trống</h2>
-        <p>Bạn chưa thêm sản phẩm nào vào giỏ hàng.</p>
-
-        <a asp-controller="Product" asp-action="Index" class="btn-hero">
-            Mua sắm ngay
-        </a>
-    </div>
-}
+    }
+    else
+    {
+        <div class="empty-box full reveal">
+            <h3>Giỏ hàng của bạn đang trống</h3>
+            <p>Thêm vài món thật đẹp để bắt đầu đơn hàng đầu tiên.</p>
+            <a asp-controller="Product" asp-action="Index" class="btn-solid">Khám phá sản phẩm</a>
+        </div>
+    }
+</section>

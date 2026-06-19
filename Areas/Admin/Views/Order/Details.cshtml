@@ -165,7 +165,7 @@
                         <td>
                             @if (!string.IsNullOrWhiteSpace(item.SanPham?.HinhAnh))
                             {
-                                <img src="@item.SanPham.HinhAnh" alt="@item.SanPham.TenSanPham" class="admin-product-img" />
+                                <img src="@FashionImageHelper.GetProductImage(item.SanPham.HinhAnh, item.SanPham.TenSanPham, item.SanPham.DanhMuc?.TenDanhMuc)" alt="@item.SanPham.TenSanPham" class="admin-product-img" />
                             }
                             else
                             {

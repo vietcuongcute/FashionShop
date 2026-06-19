@@ -4,6 +4,7 @@ using FashionShop.Web.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FashionShop.Web.Migrations
 {
     [DbContext(typeof(FashionShopDbContext))]
-    partial class FashionShopDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260619041000_SeedMoreFashionData")]
+    partial class SeedMoreFashionData
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

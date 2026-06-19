@@ -1,69 +1,37 @@
-@model FashionShop.Web.Models.ViewModels.RegisterViewModel
-
+@model RegisterViewModel
 @{
     ViewData["Title"] = "Đăng ký";
 }
 
-<section class="auth-page">
-    <div class="auth-card">
-        <div class="auth-header">
-            <h1>Tạo tài khoản</h1>
-            <p>Đăng ký để mua sắm và theo dõi đơn hàng của bạn</p>
+<section class="auth-layout refined-auth">
+    <div class="auth-panel visual reveal" style="background-image:linear-gradient(180deg, rgba(22,20,20,.16), rgba(22,20,20,.66)), url('@FashionImageHelper.GetLookbook("register")')">
+        <div class="visual-copy">
+            <span>Create account</span>
+            <h1>Join VyAnhFashion.</h1>
+            <p>Đăng ký để lưu sản phẩm yêu thích, quản lý hồ sơ và nhận ưu đãi thành viên.</p>
         </div>
-
+    </div>
+    <div class="auth-panel form-panel reveal delay-1">
+        <div class="form-title">
+            <span class="eyebrow">New member</span>
+            <h2>Tạo tài khoản</h2>
+            <p>Điền thông tin cơ bản để bắt đầu mua sắm.</p>
+        </div>
         <form asp-controller="Account" asp-action="Register" method="post">
             @Html.AntiForgeryToken()
-
             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-
-            <div class="form-group-custom">
-                <label asp-for="HoTen">Họ tên</label>
-                <input asp-for="HoTen" placeholder="Nhập họ tên của bạn" />
-                <span asp-validation-for="HoTen" class="text-danger"></span>
+            <div class="field"><label asp-for="HoTen">Họ tên</label><input asp-for="HoTen" /><span asp-validation-for="HoTen" class="text-danger"></span></div>
+            <div class="field"><label asp-for="Email">Email</label><input asp-for="Email" /><span asp-validation-for="Email" class="text-danger"></span></div>
+            <div class="field two-col-inline">
+                <div><label asp-for="MatKhau">Mật khẩu</label><input asp-for="MatKhau" type="password" /><span asp-validation-for="MatKhau" class="text-danger"></span></div>
+                <div><label asp-for="XacNhanMatKhau">Xác nhận mật khẩu</label><input asp-for="XacNhanMatKhau" type="password" /><span asp-validation-for="XacNhanMatKhau" class="text-danger"></span></div>
             </div>
-
-            <div class="form-group-custom">
-                <label asp-for="Email">Email</label>
-                <input asp-for="Email" placeholder="Nhập email" />
-                <span asp-validation-for="Email" class="text-danger"></span>
-            </div>
-
-            <div class="form-group-custom">
-                <label asp-for="MatKhau">Mật khẩu</label>
-                <input asp-for="MatKhau" type="password" placeholder="Nhập mật khẩu" />
-                <span asp-validation-for="MatKhau" class="text-danger"></span>
-            </div>
-
-            <div class="form-group-custom">
-                <label asp-for="XacNhanMatKhau">Xác nhận mật khẩu</label>
-                <input asp-for="XacNhanMatKhau" type="password" placeholder="Nhập lại mật khẩu" />
-                <span asp-validation-for="XacNhanMatKhau" class="text-danger"></span>
-            </div>
-
-            <div class="form-group-custom">
-                <label asp-for="SoDienThoai">Số điện thoại</label>
-                <input asp-for="SoDienThoai" placeholder="Nhập số điện thoại" />
-                <span asp-validation-for="SoDienThoai" class="text-danger"></span>
-            </div>
-
-            <div class="form-group-custom">
-                <label asp-for="DiaChi">Địa chỉ</label>
-                <textarea asp-for="DiaChi" rows="3" placeholder="Nhập địa chỉ"></textarea>
-                <span asp-validation-for="DiaChi" class="text-danger"></span>
-            </div>
-
-            <button type="submit" class="btn-auth">
-                Đăng ký
-            </button>
+            <div class="field"><label asp-for="SoDienThoai">Số điện thoại</label><input asp-for="SoDienThoai" /><span asp-validation-for="SoDienThoai" class="text-danger"></span></div>
+            <div class="field"><label asp-for="DiaChi">Địa chỉ</label><textarea asp-for="DiaChi" rows="3"></textarea><span asp-validation-for="DiaChi" class="text-danger"></span></div>
+            <button type="submit" class="btn-solid full-width">Đăng ký tài khoản</button>
         </form>
-
-        <div class="auth-footer">
-            Đã có tài khoản?
-            <a asp-controller="Account" asp-action="Login">Đăng nhập ngay</a>
-        </div>
+        <p class="form-note">Đã có tài khoản? <a asp-controller="Account" asp-action="Login">Đăng nhập</a></p>
     </div>
 </section>
 
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

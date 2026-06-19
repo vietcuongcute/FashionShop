@@ -1,58 +1,31 @@
-@model FashionShop.Web.Models.ViewModels.LoginViewModel
-
+@model LoginViewModel
 @{
     ViewData["Title"] = "Đăng nhập";
 }
 
-<section class="auth-page">
-    <div class="auth-card">
-        <div class="auth-header">
-            <h1>Đăng nhập</h1>
-            <p>Chào mừng bạn quay lại Fashion Shop</p>
+<section class="auth-layout refined-auth">
+    <div class="auth-panel visual reveal" style="background-image:linear-gradient(180deg, rgba(22,20,20,.18), rgba(22,20,20,.68)), url('@FashionImageHelper.GetLookbook("login")')">
+        <div class="visual-copy">
+            <span>Welcome back</span>
+            <h1>Sign in to your fashion space.</h1>
+            <p>Lưu wishlist, theo dõi đơn hàng và checkout nhanh hơn trong những lần mua tiếp theo.</p>
         </div>
-
-        @if (TempData["Success"] != null)
-        {
-            <div class="alert alert-success">
-                @TempData["Success"]
-            </div>
-        }
-
+    </div>
+    <div class="auth-panel form-panel reveal delay-1">
+        <div class="form-title">
+            <span class="eyebrow">Account</span>
+            <h2>Đăng nhập</h2>
+            <p>Nhập email và mật khẩu để truy cập tài khoản VyAnhFashion.</p>
+        </div>
         <form asp-controller="Account" asp-action="Login" method="post">
             @Html.AntiForgeryToken()
-
             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-
-            <div class="form-group-custom">
-                <label asp-for="Email">Email</label>
-                <input asp-for="Email" placeholder="Nhập email" />
-                <span asp-validation-for="Email" class="text-danger"></span>
-            </div>
-
-            <div class="form-group-custom">
-                <label asp-for="MatKhau">Mật khẩu</label>
-                <input asp-for="MatKhau" type="password" placeholder="Nhập mật khẩu" />
-                <span asp-validation-for="MatKhau" class="text-danger"></span>
-            </div>
-
-            <button type="submit" class="btn-auth">
-                Đăng nhập
-            </button>
+            <div class="field"><label asp-for="Email">Email</label><input asp-for="Email" placeholder="you@example.com" /><span asp-validation-for="Email" class="text-danger"></span></div>
+            <div class="field"><label asp-for="MatKhau">Mật khẩu</label><input asp-for="MatKhau" type="password" placeholder="••••••••" /><span asp-validation-for="MatKhau" class="text-danger"></span></div>
+            <button type="submit" class="btn-solid full-width">Đăng nhập</button>
         </form>
-
-        <div class="auth-demo-box">
-            <strong>Tài khoản mẫu:</strong>
-            <p>Customer: tự đăng ký tài khoản mới để test</p>
-            <p>Admin: admin@gmail.com / 123456</p>
-        </div>
-
-        <div class="auth-footer">
-            Chưa có tài khoản?
-            <a asp-controller="Account" asp-action="Register">Đăng ký ngay</a>
-        </div>
+        <p class="form-note">Chưa có tài khoản? <a asp-controller="Account" asp-action="Register">Tạo tài khoản mới</a></p>
     </div>
 </section>
 
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

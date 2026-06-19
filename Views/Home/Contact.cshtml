@@ -1,0 +1,39 @@
+@model ContactViewModel
+@{
+    ViewData["Title"] = "Liên hệ";
+}
+
+<section class="page-hero compact">
+    <div class="container">
+        <span>Customer care</span>
+        <h1>Liên hệ VyAnhFashion</h1>
+        <p>Gửi yêu cầu tư vấn size, sản phẩm hoặc hỗ trợ đơn hàng.</p>
+    </div>
+</section>
+
+<section class="container contact-layout">
+    <aside class="contact-card">
+        <h2>Thông tin cửa hàng</h2>
+        <div><b>Địa chỉ</b><span>Đà Nẵng, Việt Nam</span></div>
+        <div><b>Email</b><span>support@vyanhfashion.local</span></div>
+        <div><b>Hotline</b><span>0900 000 000</span></div>
+        <div><b>Thời gian</b><span>08:00 - 21:00 mỗi ngày</span></div>
+    </aside>
+    <div class="form-card">
+        <div class="form-title">
+            <h2>Gửi liên hệ</h2>
+            <p>Đội ngũ chăm sóc khách hàng sẽ phản hồi sớm nhất.</p>
+        </div>
+        <form asp-action="Contact" method="post">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            <div class="field"><label asp-for="HoTen">Họ tên</label><input asp-for="HoTen" /><span asp-validation-for="HoTen" class="text-danger"></span></div>
+            <div class="field"><label asp-for="Email">Email</label><input asp-for="Email" /><span asp-validation-for="Email" class="text-danger"></span></div>
+            <div class="field"><label asp-for="SoDienThoai">Số điện thoại</label><input asp-for="SoDienThoai" /><span asp-validation-for="SoDienThoai" class="text-danger"></span></div>
+            <div class="field"><label asp-for="NoiDung">Nội dung</label><textarea asp-for="NoiDung" rows="5"></textarea><span asp-validation-for="NoiDung" class="text-danger"></span></div>
+            <button type="submit" class="btn-solid">Gửi liên hệ</button>
+        </form>
+    </div>
+</section>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

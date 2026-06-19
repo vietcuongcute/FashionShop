@@ -1,0 +1,32 @@
+@model List<SanPham>
+@{
+    ViewData["Title"] = "Yêu thích";
+}
+
+<section class="page-hero compact">
+    <div class="container">
+        <span>Wishlist</span>
+        <h1>Sản phẩm yêu thích</h1>
+        <p>Danh sách riêng của khách hàng trong phiên mua sắm. Admin không xem dữ liệu yêu thích của user.</p>
+    </div>
+</section>
+
+<section class="container section-area">
+    @if (Model.Any())
+    {
+        <div class="product-grid">
+            @foreach (var item in Model)
+            {
+                <partial name="~/Views/Shared/_ProductCard.cshtml" model="item" />
+            }
+        </div>
+    }
+    else
+    {
+        <div class="empty-box full">
+            <h3>Chưa có sản phẩm yêu thích</h3>
+            <p>Bấm biểu tượng trái tim trên sản phẩm để lưu lại item muốn xem sau.</p>
+            <a asp-controller="Product" asp-action="Index" class="btn-solid">Khám phá sản phẩm</a>
+        </div>
+    }
+</section>

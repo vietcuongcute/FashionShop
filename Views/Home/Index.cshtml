@@ -1,87 +1,136 @@
-﻿@model IEnumerable<FashionShop.Web.Models.Entities.SanPham>
-
+@model HomeViewModel
 @{
     ViewData["Title"] = "Trang chủ";
+    var categories = Model.DanhMucs.Take(6).ToList();
 }
 
-<section class="hero-section">
-    <div class="hero-content">
-        <span class="hero-badge">Fashion Shop</span>
-        <h1>Thời trang hiện đại cho phong cách của bạn</h1>
-        <p>
-            Khám phá các mẫu quần áo thời trang mới nhất, dễ phối đồ,
-            phù hợp đi học, đi làm và đi chơi.
-        </p>
-        <a href="#san-pham-moi" class="btn-hero">Mua sắm ngay</a>
+<section class="hero-commerce hero-split">
+    <div class="container hero-grid">
+        <div class="hero-content reveal">
+            <span class="eyebrow">VyAnhFashion · curated wardrobe</span>
+            <h1>Minimal pieces,<br />maximal presence.</h1>
+            <p>Khám phá không gian mua sắm thời trang theo phong cách ecommerce hiện đại: hình ảnh editorial, sản phẩm rõ ràng, bộ lọc tiện dụng và trải nghiệm mượt như website thương mại điện tử thực tế.</p>
+            <div class="hero-actions">
+                <a asp-controller="Product" asp-action="Index" asp-route-sortOrder="newest" class="btn-solid">Shop new in</a>
+                <a asp-controller="Product" asp-action="Index" class="btn-outline-dark">Khám phá cửa hàng</a>
+            </div>
+            <div class="hero-stats">
+                <div><strong>@(Model.TongSanPham)+</strong><span>mẫu nổi bật</span></div>
+                <div><strong>7 ngày</strong><span>đổi trả</span></div>
+                <div><strong>24/7</strong><span>hỗ trợ online</span></div>
+            </div>
+        </div>
+        <div class="hero-visual reveal delay-1">
+            <div class="hero-editorial-card">
+                <img src="@FashionImageHelper.GetLookbook("hero")" alt="Fashion editorial" />
+            </div>
+            <div class="floating-offer glass-card">
+                <span>Editor’s note</span>
+                <strong>Drop mới mỗi tuần</strong>
+                <small>Chất liệu dễ mặc · tông màu sang · phối đồ nhanh</small>
+            </div>
+            <div class="floating-mini glass-card">
+                <span>Free shipping</span>
+                <strong>Đơn từ 499.000đ</strong>
+            </div>
+        </div>
     </div>
 </section>
 
-<section class="category-section">
-    <div class="section-title">
-        <h2>Danh mục nổi bật</h2>
-        <p>Lựa chọn phong cách phù hợp với bạn</p>
-    </div>
-
-    <div class="category-grid">
-        <div class="category-card">Áo thun</div>
-        <div class="category-card">Áo sơ mi</div>
-        <div class="category-card">Quần jean</div>
-        <div class="category-card">Váy</div>
-        <div class="category-card">Áo khoác</div>
-    </div>
+<section class="container logo-ticker reveal">
+    <div>new season</div>
+    <div>wardrobe staples</div>
+    <div>tailored silhouettes</div>
+    <div>timeless dresses</div>
+    <div>elevated basics</div>
 </section>
 
-<section class="product-section" id="san-pham-moi">
-    <div class="section-title">
-        <h2>Sản phẩm mới nhất</h2>
-        <p>Các sản phẩm đang có tại cửa hàng</p>
+<section class="container category-showcase section-area">
+    <div class="section-title reveal">
+        <div>
+            <span>Shop by category</span>
+            <h2>Danh mục nổi bật</h2>
+        </div>
+        <a asp-controller="Product" asp-action="Index">Xem toàn bộ</a>
     </div>
-
-    @if (Model != null && Model.Any())
-    {
-        <div class="product-grid">
-            @foreach (var item in Model)
-            {
-                <div class="product-card">
-                    <div class="product-image">
-                        @if (!string.IsNullOrWhiteSpace(item.HinhAnh))
-                        {
-                            <img src="@item.HinhAnh" alt="@item.TenSanPham" class="product-img" />
-                        }
-                        else
-                        {
-                            <div class="product-img no-image">
-                                No image
-                            </div>
-                        }
-                    </div>
-
-                    <div class="product-info">
-                        <span class="product-category">
-                            @(item.DanhMuc?.TenDanhMuc ?? "Chưa có danh mục")
-                        </span>
-
-                        <h3>@item.TenSanPham</h3>
-
-                        <p class="product-desc">
-                            @item.MoTa
-                        </p>
-
-                        <div class="product-bottom">
-                            <strong>@item.Gia.ToString("N0") đ</strong>
-                            <a asp-controller="Product" asp-action="Details" asp-route-id="@item.Id" class="btn-detail">
-                                Xem chi tiết
-                            </a>
-                        </div>
-                    </div>
+    <div class="category-row category-luxury-grid">
+        @foreach (var item in categories)
+        {
+            <a class="category-card reveal" asp-controller="Product" asp-action="Index" asp-route-categoryId="@item.Id">
+                <div class="category-media">
+                    <img src="@FashionImageHelper.GetCategoryImage(item.TenDanhMuc)" alt="@item.TenDanhMuc" />
                 </div>
-            }
+                <div class="category-copy">
+                    <strong>@item.TenDanhMuc</strong>
+                    <span>@(string.IsNullOrWhiteSpace(item.MoTa) ? "Selected for everyday style" : item.MoTa)</span>
+                </div>
+            </a>
+        }
+    </div>
+</section>
+
+<section class="container section-area">
+    <div class="section-title reveal">
+        <div>
+            <span>Best sellers</span>
+            <h2>Được yêu thích nhất</h2>
         </div>
-    }
-    else
-    {
-        <div class="empty-box">
-            Chưa có sản phẩm nào trong database.
+        <a asp-controller="Product" asp-action="Index" asp-route-sortOrder="featured">Xem tất cả</a>
+    </div>
+    <div class="product-grid">
+        @foreach (var item in Model.SanPhamNoiBat.Take(8))
+        {
+            <partial name="~/Views/Shared/_ProductCard.cshtml" model="item" />
+        }
+    </div>
+</section>
+
+<section class="container editorial-grid section-area">
+    <a class="editorial-card large reveal" asp-controller="Product" asp-action="Index" asp-route-keyword="váy">
+        <img src="@FashionImageHelper.GetLookbook("occasion")" alt="Occasion dresses" />
+        <div class="editorial-copy">
+            <span>Occasion edit</span>
+            <h3>Dresses for elevated moments</h3>
+            <strong>Shop dresses</strong>
         </div>
-    }
+    </a>
+    <a class="editorial-card reveal delay-1" asp-controller="Product" asp-action="Index" asp-route-keyword="khoác">
+        <img src="@FashionImageHelper.GetLookbook("outerwear")" alt="Outerwear" />
+        <div class="editorial-copy">
+            <span>Outerwear</span>
+            <h3>Layering that feels premium</h3>
+            <strong>Khám phá</strong>
+        </div>
+    </a>
+    <a class="editorial-card reveal delay-2" asp-controller="Product" asp-action="Index" asp-route-sortOrder="price_asc">
+        <img src="@FashionImageHelper.GetLookbook("collection")" alt="Sale picks" />
+        <div class="editorial-copy">
+            <span>Sale selection</span>
+            <h3>Curated pieces up to 30% off</h3>
+            <strong>Mua ngay</strong>
+        </div>
+    </a>
+</section>
+
+<section class="container section-area">
+    <div class="section-title reveal">
+        <div>
+            <span>New arrivals</span>
+            <h2>Vừa cập bến</h2>
+        </div>
+        <a asp-controller="Product" asp-action="Index" asp-route-sortOrder="newest">Xem tất cả</a>
+    </div>
+    <div class="product-grid">
+        @foreach (var item in Model.SanPhamMoi.Take(8))
+        {
+            <partial name="~/Views/Shared/_ProductCard.cshtml" model="item" />
+        }
+    </div>
+</section>
+
+<section class="container trust-strip luxury-trust reveal">
+    <div><strong>Fast delivery</strong><span>Giao hàng nhanh toàn quốc</span></div>
+    <div><strong>Premium support</strong><span>CSKH phản hồi nhanh, thân thiện</span></div>
+    <div><strong>Easy return</strong><span>Đổi trả trong 7 ngày</span></div>
+    <div><strong>Secure checkout</strong><span>COD, chuyển khoản, MoMo</span></div>
 </section>

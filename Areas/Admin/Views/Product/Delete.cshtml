@@ -24,7 +24,7 @@
     @if (!string.IsNullOrWhiteSpace(Model.HinhAnh))
     {
         <div class="form-group">
-            <img src="@Model.HinhAnh" alt="@Model.TenSanPham" class="preview-product-img" />
+            <img src="@FashionImageHelper.GetProductImage(Model.HinhAnh, Model.TenSanPham, Model.DanhMuc?.TenDanhMuc)" alt="@Model.TenSanPham" class="preview-product-img" />
         </div>
     }
 

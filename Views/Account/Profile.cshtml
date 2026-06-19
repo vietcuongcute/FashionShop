@@ -1,0 +1,45 @@
+@model NguoiDung
+@{
+    ViewData["Title"] = "Hồ sơ tài khoản";
+}
+
+<section class="page-hero compact">
+    <div class="container">
+        <span>My account</span>
+        <h1>Hồ sơ tài khoản</h1>
+        <p>Cập nhật thông tin cá nhân để checkout nhanh và chính xác hơn.</p>
+    </div>
+</section>
+
+<section class="container profile-layout">
+    <aside class="profile-card">
+        <div class="profile-avatar">@Model.HoTen.Substring(0, 1).ToUpper()</div>
+        <h2>@Model.HoTen</h2>
+        <p>@Model.Email</p>
+        <span>@Model.VaiTro</span>
+        @if (Model.VaiTro != "Admin")
+        {
+            <a asp-controller="Order" asp-action="History" class="btn-soft full-width">Đơn hàng của tôi</a>
+        }
+    </aside>
+    <div class="form-card">
+        <div class="form-title">
+            <h2>Cập nhật hồ sơ</h2>
+            <p>Bỏ trống mật khẩu nếu không muốn đổi mật khẩu hiện tại.</p>
+        </div>
+        <form asp-controller="Account" asp-action="Profile" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="VaiTro" />
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            <div class="field"><label asp-for="HoTen">Họ tên</label><input asp-for="HoTen" /><span asp-validation-for="HoTen" class="text-danger"></span></div>
+            <div class="field"><label asp-for="Email">Email</label><input asp-for="Email" /><span asp-validation-for="Email" class="text-danger"></span></div>
+            <div class="field"><label asp-for="SoDienThoai">Số điện thoại</label><input asp-for="SoDienThoai" /><span asp-validation-for="SoDienThoai" class="text-danger"></span></div>
+            <div class="field"><label asp-for="DiaChi">Địa chỉ</label><textarea asp-for="DiaChi" rows="3"></textarea><span asp-validation-for="DiaChi" class="text-danger"></span></div>
+            <div class="field"><label asp-for="MatKhau">Mật khẩu mới</label><input asp-for="MatKhau" type="password" value="" placeholder="Bỏ trống nếu không đổi" /><span asp-validation-for="MatKhau" class="text-danger"></span></div>
+            <button type="submit" class="btn-solid">Lưu thay đổi</button>
+        </form>
+    </div>
+</section>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

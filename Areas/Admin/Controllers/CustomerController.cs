@@ -1,4 +1,5 @@
 using FashionShop.Web.Data;
+using FashionShop.Web.Filters;
 using FashionShop.Web.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -6,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace FashionShop.Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [AdminAuthorize]
     public class CustomerController : Controller
     {
         private readonly FashionShopDbContext _context;
@@ -109,6 +111,10 @@ namespace FashionShop.Web.Areas.Admin.Controllers
             {
                 return NotFound();
             }
+
+            ModelState.Remove("MatKhau");
+            ModelState.Remove("VaiTro");
+            ModelState.Remove("DonHangs");
 
             if (!ModelState.IsValid)
             {

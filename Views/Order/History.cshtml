@@ -1,107 +1,54 @@
-@model IEnumerable<FashionShop.Web.Models.Entities.DonHang>
-
+@model List<DonHang>
 @{
-    ViewData["Title"] = "Lịch sử đơn hàng";
+    ViewData["Title"] = "Đơn hàng của tôi";
 }
 
-<section class="order-history-page">
+<section class="page-hero compact">
     <div class="container">
-        <div class="page-title">
-            <h1>Lịch sử đơn hàng</h1>
-            <p>Theo dõi các đơn hàng bạn đã đặt tại FashionShop.</p>
-        </div>
-
-        @if (TempData["SuccessMessage"] != null)
-        {
-            <div class="alert-success">
-                @TempData["SuccessMessage"]
-            </div>
-        }
-
-        @if (TempData["ErrorMessage"] != null)
-        {
-            <div class="alert-error">
-                @TempData["ErrorMessage"]
-            </div>
-        }
-
-        @if (Model != null && Model.Any())
-        {
-            <div class="order-history-list">
-                @foreach (var item in Model)
-                {
-                    <div class="order-history-card">
-                        <div class="order-history-main">
-                            <div>
-                                <h3>Đơn hàng #@item.Id</h3>
-                                <p>Ngày đặt: @item.NgayDat.ToString("dd/MM/yyyy HH:mm")</p>
-                                <p>Số sản phẩm: @(item.ChiTietDonHangs?.Count ?? 0)</p>
-                            </div>
-
-                            <div class="order-history-price">
-                                <span class="order-status @GetStatusClass(item.TrangThai)">
-                                    @item.TrangThai
-                                </span>
-
-                                <strong>@item.TongTien.ToString("N0") đ</strong>
-                            </div>
-                        </div>
-
-                        <div class="order-history-footer">
-                            <div>
-                                <span>Người nhận:</span>
-                                <strong>@item.HoTenNguoiNhan</strong>
-                            </div>
-
-                            <div class="order-history-actions">
-                                <a asp-controller="Order" asp-action="Details" asp-route-id="@item.Id" class="btn-main">
-                                    Xem chi tiết
-                                </a>
-
-                                @if (item.TrangThai == "Chờ xác nhận")
-                                {
-                                    <form asp-controller="Order" asp-action="Cancel" method="post"
-                                          onsubmit="return confirm('Bạn có chắc chắn muốn hủy đơn hàng này không?');">
-                                        @Html.AntiForgeryToken()
-
-                                        <input type="hidden" name="id" value="@item.Id" />
-
-                                        <button type="submit" class="btn-danger">
-                                            Hủy đơn
-                                        </button>
-                                    </form>
-                                }
-                            </div>
-                        </div>
-                    </div>
-                }
-            </div>
-        }
-        else
-        {
-            <div class="empty-order-box">
-                <h3>Bạn chưa có đơn hàng nào</h3>
-                <p>Hãy chọn sản phẩm yêu thích và đặt hàng ngay.</p>
-
-                <a asp-controller="Product" asp-action="Index" class="btn-main">
-                    Mua sắm ngay
-                </a>
-            </div>
-        }
+        <span>Order history</span>
+        <h1>Đơn hàng của tôi</h1>
+        <p>Theo dõi trạng thái và xem chi tiết các đơn hàng đã đặt tại VyAnhFashion.</p>
     </div>
 </section>
 
-@functions {
-    string GetStatusClass(string trangThai)
+<section class="container order-list-page">
+    @if (Model.Any())
     {
-        return trangThai switch
-        {
-            "Chờ xác nhận" => "status-pending",
-            "Đã xác nhận" => "status-confirmed",
-            "Đang giao" => "status-shipping",
-            "Hoàn thành" => "status-completed",
-            "Đã hủy" => "status-cancelled",
-            _ => "status-default"
-        };
+        <div class="order-list">
+            @foreach (var item in Model)
+            {
+                <article class="order-card">
+                    <div>
+                        <span class="status-pill @GetStatusClass(item.TrangThai)">@item.TrangThai</span>
+                        <h3>Đơn hàng #@item.Id</h3>
+                        <p>@item.NgayDat.ToString("dd/MM/yyyy HH:mm") · @item.ChiTietDonHangs.Count sản phẩm</p>
+                    </div>
+                    <div class="order-card-side">
+                        <strong>@item.TongTien.ToString("N0") đ</strong>
+                        <a asp-controller="Order" asp-action="Details" asp-route-id="@item.Id" class="btn-soft">Chi tiết</a>
+                    </div>
+                </article>
+            }
+        </div>
     }
+    else
+    {
+        <div class="empty-box full">
+            <h3>Bạn chưa có đơn hàng</h3>
+            <p>Bắt đầu mua sắm để tạo đơn hàng đầu tiên.</p>
+            <a asp-controller="Product" asp-action="Index" class="btn-solid">Mua sắm ngay</a>
+        </div>
+    }
+</section>
+
+@functions {
+    string GetStatusClass(string trangThai) => trangThai switch
+    {
+        "Chờ xác nhận" => "pending",
+        "Đã xác nhận" => "confirmed",
+        "Đang giao" => "shipping",
+        "Hoàn thành" => "completed",
+        "Đã hủy" => "cancelled",
+        _ => "default"
+    };
 }

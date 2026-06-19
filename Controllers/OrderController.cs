@@ -36,9 +36,15 @@ namespace FashionShop.Web.Controllers
                 return RedirectToAction("Index", "Cart");
             }
 
+            var currentUser = userId.HasValue ? _context.NguoiDungs.FirstOrDefault(x => x.Id == userId.Value) : null;
+
             var model = new CheckoutViewModel
             {
-                CartItems = cart
+                CartItems = cart,
+                HoTenNguoiNhan = currentUser?.HoTen ?? string.Empty,
+                SoDienThoai = currentUser?.SoDienThoai ?? string.Empty,
+                DiaChiGiaoHang = currentUser?.DiaChi ?? string.Empty,
+                PhuongThucThanhToan = "COD"
             };
 
             return View(model);
@@ -107,7 +113,7 @@ namespace FashionShop.Web.Controllers
                     HoTenNguoiNhan = model.HoTenNguoiNhan,
                     SoDienThoai = model.SoDienThoai,
                     DiaChiGiaoHang = model.DiaChiGiaoHang,
-                    GhiChu = model.GhiChu
+                    GhiChu = BuildOrderNote(model.GhiChu, model.PhuongThucThanhToan)
                 };
 
                 _context.DonHangs.Add(donHang);
@@ -256,6 +262,23 @@ namespace FashionShop.Web.Controllers
                 return RedirectToAction(nameof(Details), new { id = donHang.Id });
             }
         }
+        private static string? BuildOrderNote(string? ghiChu, string? phuongThucThanhToan)
+        {
+            var paymentText = phuongThucThanhToan switch
+            {
+                "Bank" => "Chuyển khoản ngân hàng",
+                "Momo" => "Ví điện tử MoMo",
+                _ => "Thanh toán khi nhận hàng"
+            };
+
+            if (string.IsNullOrWhiteSpace(ghiChu))
+            {
+                return $"Phương thức thanh toán: {paymentText}";
+            }
+
+            return $"{ghiChu.Trim()} | Phương thức thanh toán: {paymentText}";
+        }
+
         private List<CartItemViewModel> GetCart()
         {
             var cart = HttpContext.Session.GetObject<List<CartItemViewModel>>(CartSessionKey);

@@ -1,0 +1,53 @@
+@using Microsoft.AspNetCore.Http
+@model SanPham
+@{
+    var role = Context.Session.GetString("UserRole");
+    var isAdmin = role == "Admin";
+    var returnUrl = Context.Request.Path.ToString() + Context.Request.QueryString.ToString();
+    var imageUrl = FashionImageHelper.GetProductImage(Model.HinhAnh, Model.TenSanPham, Model.DanhMuc?.TenDanhMuc);
+}
+<article class="product-card reveal">
+    <a class="product-media" asp-controller="Product" asp-action="Details" asp-route-id="@Model.Id">
+        @if (Model.NoiBat)
+        {
+            <span class="product-tag">Best seller</span>
+        }
+        <img src="@imageUrl" alt="@Model.TenSanPham" loading="lazy" />
+        <span class="product-hover-note">Quick view</span>
+    </a>
+    <div class="product-info">
+        <div class="product-meta">
+            <span>@(Model.DanhMuc?.TenDanhMuc ?? "VyAnhFashion")</span>
+            <span>@(Model.SoLuongTon > 0 ? "In stock" : "Sold out")</span>
+        </div>
+        <a asp-controller="Product" asp-action="Details" asp-route-id="@Model.Id" class="product-name">@Model.TenSanPham</a>
+        <div class="product-bottom">
+            <strong>@Model.Gia.ToString("N0") đ</strong>
+            @if (!isAdmin)
+            {
+                <div class="product-actions">
+                    <form asp-controller="Wishlist" asp-action="Toggle" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="sanPhamId" value="@Model.Id" />
+                        <input type="hidden" name="returnUrl" value="@returnUrl" />
+                        <button type="submit" aria-label="Yêu thích">♡</button>
+                    </form>
+                    <form asp-controller="Cart" asp-action="AddToCart" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="sanPhamId" value="@Model.Id" />
+                        <input type="hidden" name="soLuong" value="1" />
+                        <input type="hidden" name="returnUrl" value="@returnUrl" />
+                        @if (Model.SoLuongTon > 0)
+                        {
+                            <button type="submit">Add</button>
+                        }
+                        else
+                        {
+                            <button type="submit" disabled>Hết</button>
+                        }
+                    </form>
+                </div>
+            }
+        </div>
+    </div>
+</article>

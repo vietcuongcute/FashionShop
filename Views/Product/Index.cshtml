@@ -1,32 +1,39 @@
-@model IEnumerable<FashionShop.Web.Models.Entities.SanPham>
-
+@model IEnumerable<SanPham>
 @{
     ViewData["Title"] = "Sản phẩm";
-    var danhMucs = ViewBag.DanhMucs as List<FashionShop.Web.Models.Entities.DanhMuc>;
+    var danhMucs = ViewBag.DanhMucs as List<DanhMuc> ?? new List<DanhMuc>();
     int? categoryId = ViewBag.CategoryId as int?;
     string keyword = ViewBag.Keyword as string ?? "";
-    string sortOrder = ViewBag.SortOrder as string ?? "";
+    string sortOrder = ViewBag.SortOrder as string ?? "newest";
+    decimal? minPrice = ViewBag.MinPrice as decimal?;
+    decimal? maxPrice = ViewBag.MaxPrice as decimal?;
+    bool? inStock = ViewBag.InStock as bool?;
 }
 
-<section class="page-header">
-    <h1>Sản phẩm thời trang</h1>
-    <p>Khám phá các mẫu quần áo mới nhất tại Fashion Shop</p>
+<section class="shop-banner" style="background-image:linear-gradient(90deg, rgba(20,18,18,.72), rgba(20,18,18,.28)), url('@FashionImageHelper.GetLookbook("shop")')">
+    <div class="container reveal">
+        <span>VyAnhFashion Shop</span>
+        <h1>A curated shop for modern dressing</h1>
+        <p>Lọc nhanh theo danh mục, giá, trạng thái còn hàng và sắp xếp theo nhu cầu mua sắm. Tone giao diện và bố cục được tối ưu theo phong cách ecommerce thực tế.</p>
+    </div>
 </section>
 
-<section class="product-filter-box">
-    <form asp-controller="Product" asp-action="Index" method="get" class="product-filter-form">
-        <div class="filter-group">
-            <label>Tìm kiếm</label>
-            <input type="text" name="keyword" value="@keyword" placeholder="Nhập tên sản phẩm..." />
+<section class="container shop-layout">
+    <aside class="filter-sidebar reveal">
+        <div class="filter-head">
+            <h2>Bộ lọc</h2>
+            <a asp-controller="Product" asp-action="Index">Xóa tất cả</a>
         </div>
-
-        <div class="filter-group">
-            <label>Danh mục</label>
-            <select name="categoryId">
-                <option value="">Tất cả danh mục</option>
-                @if (danhMucs != null)
-                {
-                    foreach (var dm in danhMucs)
+        <form asp-controller="Product" asp-action="Index" method="get" class="filter-form-ui">
+            <label>
+                <span>Từ khóa</span>
+                <input type="text" name="keyword" value="@keyword" placeholder="áo sơ mi, váy, blazer..." />
+            </label>
+            <label>
+                <span>Danh mục</span>
+                <select name="categoryId">
+                    <option value="">Tất cả danh mục</option>
+                    @foreach (var dm in danhMucs)
                     {
                         if (categoryId == dm.Id)
                         {
@@ -37,102 +44,62 @@
                             <option value="@dm.Id">@dm.TenDanhMuc</option>
                         }
                     }
+                </select>
+            </label>
+            <div class="price-pair">
+                <label><span>Giá từ</span><input type="number" name="minPrice" value="@minPrice" min="0" placeholder="0" /></label>
+                <label><span>Đến</span><input type="number" name="maxPrice" value="@maxPrice" min="0" placeholder="1000000" /></label>
+            </div>
+            <label>
+                <span>Sắp xếp</span>
+                <select name="sortOrder">
+                    @if (sortOrder == "newest" || string.IsNullOrWhiteSpace(sortOrder)) { <option value="newest" selected>Mới nhất</option> } else { <option value="newest">Mới nhất</option> }
+                    @if (sortOrder == "featured") { <option value="featured" selected>Nổi bật</option> } else { <option value="featured">Nổi bật</option> }
+                    @if (sortOrder == "price_asc") { <option value="price_asc" selected>Giá tăng dần</option> } else { <option value="price_asc">Giá tăng dần</option> }
+                    @if (sortOrder == "price_desc") { <option value="price_desc" selected>Giá giảm dần</option> } else { <option value="price_desc">Giá giảm dần</option> }
+                    @if (sortOrder == "name_asc") { <option value="name_asc" selected>Tên A-Z</option> } else { <option value="name_asc">Tên A-Z</option> }
+                </select>
+            </label>
+            <label class="check-line">
+                @if (inStock == true)
+                {
+                    <input type="checkbox" name="inStock" value="true" checked />
                 }
-            </select>
+                else
+                {
+                    <input type="checkbox" name="inStock" value="true" />
+                }
+                <span>Chỉ hiện sản phẩm còn hàng</span>
+            </label>
+            <button type="submit" class="btn-solid full-width">Áp dụng bộ lọc</button>
+        </form>
+    </aside>
+
+    <div class="shop-content">
+        <div class="shop-toolbar reveal">
+            <div>
+                <span>@Model.Count() sản phẩm</span>
+                <h2>@(string.IsNullOrWhiteSpace(keyword) ? "Selected pieces" : $"Kết quả cho: {keyword}")</h2>
+            </div>
+            <p>Hình ảnh banner lấy từ nguồn ảnh trực tuyến để tăng cảm giác như một cửa hàng thời trang thực tế.</p>
         </div>
 
-        <div class="filter-group">
-            <label>Sắp xếp</label>
-            <select name="sortOrder">
-                @if (sortOrder == "newest")
+        @if (Model.Any())
+        {
+            <div class="product-grid shop-grid">
+                @foreach (var item in Model)
                 {
-                    <option value="newest" selected>Mới nhất</option>
+                    <partial name="~/Views/Shared/_ProductCard.cshtml" model="item" />
                 }
-                else
-                {
-                    <option value="newest">Mới nhất</option>
-                }
-
-                @if (sortOrder == "price_asc")
-                {
-                    <option value="price_asc" selected>Giá tăng dần</option>
-                }
-                else
-                {
-                    <option value="price_asc">Giá tăng dần</option>
-                }
-
-                @if (sortOrder == "price_desc")
-                {
-                    <option value="price_desc" selected>Giá giảm dần</option>
-                }
-                else
-                {
-                    <option value="price_desc">Giá giảm dần</option>
-                }
-            </select>
-        </div>
-
-        <button type="submit" class="btn-filter">Lọc sản phẩm</button>
-
-        <a asp-controller="Product" asp-action="Index" class="btn-reset">
-            Xóa lọc
-        </a>
-    </form>
-</section>
-
-<section class="product-section">
-    <div class="section-title">
-        <h2>Danh sách sản phẩm</h2>
-        <p>Tìm thấy @Model.Count() sản phẩm</p>
+            </div>
+        }
+        else
+        {
+            <div class="empty-box">
+                <h3>Không tìm thấy sản phẩm</h3>
+                <p>Thử thay đổi từ khóa, danh mục hoặc khoảng giá.</p>
+                <a asp-controller="Product" asp-action="Index" class="btn-solid">Reset bộ lọc</a>
+            </div>
+        }
     </div>
-
-    @if (Model.Any())
-    {
-        <div class="product-grid">
-            @foreach (var item in Model)
-            {
-                <div class="product-card">
-                    <div class="product-image">
-                        @if (!string.IsNullOrWhiteSpace(item.HinhAnh))
-                        {
-                            <img src="@item.HinhAnh" alt="@item.TenSanPham" class="product-img" />
-                        }
-                        else
-                        {
-                            <div class="product-img no-image">
-                                No image
-                            </div>
-                        }
-                    </div>
-
-                    <div class="product-info">
-                        <span class="product-category">
-                            @(item.DanhMuc?.TenDanhMuc ?? "Chưa có danh mục")
-                        </span>
-
-                        <h3>@item.TenSanPham</h3>
-
-                        <p class="product-desc">
-                            @item.MoTa
-                        </p>
-
-                        <div class="product-bottom">
-                            <strong>@item.Gia.ToString("N0") đ</strong>
-
-                            <a asp-controller="Product" asp-action="Details" asp-route-id="@item.Id" class="btn-detail">
-                                Xem chi tiết
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            }
-        </div>
-    }
-    else
-    {
-        <div class="empty-box">
-            Không tìm thấy sản phẩm phù hợp.
-        </div>
-    }
 </section>

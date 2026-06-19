@@ -1,66 +1,23 @@
-@model FashionShop.Web.Models.Entities.DonHang
-
+@model DonHang
 @{
     ViewData["Title"] = "Đặt hàng thành công";
 }
 
-<section class="order-success-page">
+<section class="success-page">
     <div class="success-card">
-        <div class="success-icon">✓</div>
-
-        <h1>Đặt hàng thành công!</h1>
-
-        <p>
-            Cảm ơn bạn đã mua hàng tại Fashion Shop.
-            Đơn hàng của bạn đang chờ xác nhận.
-        </p>
-
-        <div class="success-info">
-            <div>
-                <span>Mã đơn hàng</span>
-                <strong>#@Model.Id</strong>
-            </div>
-
-            <div>
-                <span>Ngày đặt</span>
-                <strong>@Model.NgayDat.ToString("dd/MM/yyyy HH:mm")</strong>
-            </div>
-
-            <div>
-                <span>Trạng thái</span>
-                <strong>@Model.TrangThai</strong>
-            </div>
-
-            <div>
-                <span>Tổng tiền</span>
-                <strong>@Model.TongTien.ToString("N0") đ</strong>
-            </div>
+        <div class="success-mark">✓</div>
+        <span>Order placed</span>
+        <h1>Đặt hàng thành công</h1>
+        <p>Cảm ơn bạn đã mua hàng tại VyAnhFashion. Đơn hàng đang chờ xác nhận.</p>
+        <div class="success-grid">
+            <div><span>Mã đơn</span><strong>#@Model.Id</strong></div>
+            <div><span>Ngày đặt</span><strong>@Model.NgayDat.ToString("dd/MM/yyyy HH:mm")</strong></div>
+            <div><span>Trạng thái</span><strong>@Model.TrangThai</strong></div>
+            <div><span>Tổng tiền</span><strong>@Model.TongTien.ToString("N0") đ</strong></div>
         </div>
-
-        <div class="success-products">
-            <h2>Sản phẩm đã đặt</h2>
-
-            @foreach (var item in Model.ChiTietDonHangs)
-            {
-                <div class="success-product-item">
-                    <span>
-                        @(item.SanPham?.TenSanPham ?? "Sản phẩm")
-                        x @item.SoLuong
-                    </span>
-
-                    <strong>@item.ThanhTien.ToString("N0") đ</strong>
-                </div>
-            }
-        </div>
-
         <div class="success-actions">
-            <a asp-controller="Product" asp-action="Index" class="btn-hero">
-                Tiếp tục mua sắm
-            </a>
-
-            <a asp-controller="Home" asp-action="Index" class="btn-success-secondary">
-                Về trang chủ
-            </a>
+            <a asp-controller="Order" asp-action="Details" asp-route-id="@Model.Id" class="btn-solid">Xem đơn hàng</a>
+            <a asp-controller="Product" asp-action="Index" class="btn-soft">Tiếp tục mua sắm</a>
         </div>
     </div>
 </section>

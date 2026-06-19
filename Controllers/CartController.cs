@@ -24,7 +24,8 @@ namespace FashionShop.Web.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddToCart(int sanPhamId, int soLuong = 1)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddToCart(int sanPhamId, int soLuong = 1, string? returnUrl = null)
         {
             if (soLuong <= 0)
             {
@@ -72,10 +73,16 @@ namespace FashionShop.Web.Controllers
 
             TempData["Success"] = "Đã thêm sản phẩm vào giỏ hàng.";
 
+            if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
+            {
+                return Redirect(returnUrl);
+            }
+
             return RedirectToAction("Index");
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateQuantity(int sanPhamId, int soLuong)
         {
             var cart = GetCart();
@@ -115,6 +122,7 @@ namespace FashionShop.Web.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Remove(int sanPhamId)
         {
             var cart = GetCart();
@@ -132,6 +140,7 @@ namespace FashionShop.Web.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Clear()
         {
             HttpContext.Session.Remove(CartSessionKey);

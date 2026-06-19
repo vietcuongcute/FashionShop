@@ -1,4 +1,5 @@
 using FashionShop.Web.Data;
+using FashionShop.Web.Filters;
 using FashionShop.Web.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -7,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace FashionShop.Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [AdminAuthorize]
     public class ProductController : Controller
     {
         private readonly FashionShopDbContext _context;

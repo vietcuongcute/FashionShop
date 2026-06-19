@@ -1,10 +1,12 @@
 using FashionShop.Web.Data;
 using Microsoft.AspNetCore.Mvc;
+using FashionShop.Web.Filters;
 using Microsoft.EntityFrameworkCore;
 
 namespace FashionShop.Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [AdminAuthorize]
     public class OrderController : Controller
     {
         private readonly FashionShopDbContext _context;
@@ -14,19 +16,8 @@ namespace FashionShop.Web.Areas.Admin.Controllers
             _context = context;
         }
 
-        private bool IsAdmin()
-        {
-            var role = HttpContext.Session.GetString("UserRole");
-            return role == "Admin";
-        }
-
         public async Task<IActionResult> Index(string? keyword, string? trangThai)
         {
-            if (!IsAdmin())
-            {
-                return RedirectToAction("Login", "Account", new { area = "" });
-            }
-
             var query = _context.DonHangs
                 .Include(x => x.NguoiDung)
                 .Include(x => x.ChiTietDonHangs)
@@ -65,11 +56,6 @@ namespace FashionShop.Web.Areas.Admin.Controllers
 
         public async Task<IActionResult> Details(int id)
         {
-            if (!IsAdmin())
-            {
-                return RedirectToAction("Login", "Account", new { area = "" });
-            }
-
             var donHang = await _context.DonHangs
                 .Include(x => x.NguoiDung)
                 .Include(x => x.ChiTietDonHangs)
@@ -97,11 +83,6 @@ namespace FashionShop.Web.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateStatus(int id, string trangThai)
         {
-            if (!IsAdmin())
-            {
-                return RedirectToAction("Login", "Account", new { area = "" });
-            }
-
             var donHang = await _context.DonHangs.FindAsync(id);
 
             if (donHang == null)

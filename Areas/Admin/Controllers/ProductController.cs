@@ -10,18 +10,13 @@ namespace FashionShop.Web.Areas.Admin.Controllers
     public class ProductController : Controller
     {
         private readonly FashionShopDbContext _context;
+        private readonly IWebHostEnvironment _environment;
 
-        public ProductController(FashionShopDbContext context)
+        public ProductController(FashionShopDbContext context, IWebHostEnvironment environment)
         {
             _context = context;
+            _environment = environment;
         }
-
-        private bool IsAdmin()
-        {
-            var role = HttpContext.Session.GetString("UserRole");
-            return role == "Admin";
-        }
-
         private async Task LoadDanhMucSelectList(int? selectedId = null)
         {
             ViewBag.DanhMucs = new SelectList(
@@ -32,12 +27,39 @@ namespace FashionShop.Web.Areas.Admin.Controllers
             );
         }
 
+        private async Task<string?> SaveImageAsync(IFormFile? file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                return null;
+            }
+
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+            var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+
+            if (!allowedExtensions.Contains(extension))
+            {
+                throw new InvalidOperationException("Chỉ cho phép upload ảnh .jpg, .jpeg, .png, .webp");
+            }
+
+            var folderPath = Path.Combine(_environment.WebRootPath, "images", "products");
+
+            if (!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+            }
+
+            var fileName = $"{Guid.NewGuid()}{extension}";
+            var filePath = Path.Combine(folderPath, fileName);
+
+            using var stream = new FileStream(filePath, FileMode.Create);
+            await file.CopyToAsync(stream);
+
+            return $"/images/products/{fileName}";
+        }
+
         public async Task<IActionResult> Index(string? keyword, int? danhMucId)
         {
-            if (!IsAdmin())
-            {
-                return RedirectToAction("Login", "Account", new { area = "" });
-            }
 
             var query = _context.SanPhams
                 .Include(x => x.DanhMuc)
@@ -59,7 +81,6 @@ namespace FashionShop.Web.Areas.Admin.Controllers
 
             ViewBag.Keyword = keyword;
             ViewBag.DanhMucId = danhMucId;
-
             ViewBag.DanhMucs = new SelectList(
                 await _context.DanhMucs.OrderBy(x => x.TenDanhMuc).ToListAsync(),
                 "Id",
@@ -72,10 +93,6 @@ namespace FashionShop.Web.Areas.Admin.Controllers
 
         public async Task<IActionResult> Create()
         {
-            if (!IsAdmin())
-            {
-                return RedirectToAction("Login", "Account", new { area = "" });
-            }
 
             await LoadDanhMucSelectList();
             return View();
@@ -83,15 +100,27 @@ namespace FashionShop.Web.Areas.Admin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(SanPham sanPham)
+        public async Task<IActionResult> Create(SanPham sanPham, IFormFile? imageFile)
         {
-            if (!IsAdmin())
-            {
-                return RedirectToAction("Login", "Account", new { area = "" });
-            }
 
             if (!ModelState.IsValid)
             {
+                await LoadDanhMucSelectList(sanPham.DanhMucId);
+                return View(sanPham);
+            }
+
+            try
+            {
+                var imageUrl = await SaveImageAsync(imageFile);
+
+                if (!string.IsNullOrWhiteSpace(imageUrl))
+                {
+                    sanPham.HinhAnh = imageUrl;
+                }
+            }
+            catch (InvalidOperationException ex)
+            {
+                ModelState.AddModelError("HinhAnh", ex.Message);
                 await LoadDanhMucSelectList(sanPham.DanhMucId);
                 return View(sanPham);
             }
@@ -107,10 +136,6 @@ namespace FashionShop.Web.Areas.Admin.Controllers
 
         public async Task<IActionResult> Edit(int id)
         {
-            if (!IsAdmin())
-            {
-                return RedirectToAction("Login", "Account", new { area = "" });
-            }
 
             var sanPham = await _context.SanPhams.FindAsync(id);
 
@@ -125,13 +150,8 @@ namespace FashionShop.Web.Areas.Admin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, SanPham sanPham)
+        public async Task<IActionResult> Edit(int id, SanPham sanPham, IFormFile? imageFile)
         {
-            if (!IsAdmin())
-            {
-                return RedirectToAction("Login", "Account", new { area = "" });
-            }
-
             if (id != sanPham.Id)
             {
                 return BadRequest();
@@ -154,9 +174,32 @@ namespace FashionShop.Web.Areas.Admin.Controllers
             sanPhamCanSua.Gia = sanPham.Gia;
             sanPhamCanSua.SoLuongTon = sanPham.SoLuongTon;
             sanPhamCanSua.MoTa = sanPham.MoTa;
-            sanPhamCanSua.HinhAnh = sanPham.HinhAnh;
             sanPhamCanSua.NoiBat = sanPham.NoiBat;
             sanPhamCanSua.DanhMucId = sanPham.DanhMucId;
+
+            if (imageFile != null && imageFile.Length > 0)
+            {
+                try
+                {
+                    var imageUrl = await SaveImageAsync(imageFile);
+
+                    if (!string.IsNullOrWhiteSpace(imageUrl))
+                    {
+                        sanPhamCanSua.HinhAnh = imageUrl;
+                    }
+                }
+                catch (InvalidOperationException ex)
+                {
+                    ModelState.AddModelError("HinhAnh", ex.Message);
+                    sanPham.HinhAnh = sanPhamCanSua.HinhAnh;
+                    await LoadDanhMucSelectList(sanPham.DanhMucId);
+                    return View(sanPham);
+                }
+            }
+            else
+            {
+                sanPhamCanSua.HinhAnh = sanPham.HinhAnh;
+            }
 
             await _context.SaveChangesAsync();
 
@@ -166,11 +209,6 @@ namespace FashionShop.Web.Areas.Admin.Controllers
 
         public async Task<IActionResult> Delete(int id)
         {
-            if (!IsAdmin())
-            {
-                return RedirectToAction("Login", "Account", new { area = "" });
-            }
-
             var sanPham = await _context.SanPhams
                 .Include(x => x.DanhMuc)
                 .FirstOrDefaultAsync(x => x.Id == id);
@@ -187,11 +225,6 @@ namespace FashionShop.Web.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (!IsAdmin())
-            {
-                return RedirectToAction("Login", "Account", new { area = "" });
-            }
-
             var sanPham = await _context.SanPhams.FindAsync(id);
 
             if (sanPham == null)

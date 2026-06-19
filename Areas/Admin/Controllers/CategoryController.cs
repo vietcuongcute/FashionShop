@@ -2,10 +2,12 @@ using FashionShop.Web.Data;
 using FashionShop.Web.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using FashionShop.Web.Filters;
 
 namespace FashionShop.Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [AdminAuthorize]
     public class CategoryController : Controller
     {
         private readonly FashionShopDbContext _context;
@@ -15,19 +17,8 @@ namespace FashionShop.Web.Areas.Admin.Controllers
             _context = context;
         }
 
-        private bool IsAdmin()
-        {
-            var role = HttpContext.Session.GetString("UserRole");
-            return role == "Admin";
-        }
-
         public async Task<IActionResult> Index()
         {
-            if (!IsAdmin())
-            {
-                return RedirectToAction("Login", "Account", new { area = "" });
-            }
-
             var danhMucs = await _context.DanhMucs
                 .Include(x => x.SanPhams)
                 .OrderByDescending(x => x.Id)
@@ -38,11 +29,6 @@ namespace FashionShop.Web.Areas.Admin.Controllers
 
         public IActionResult Create()
         {
-            if (!IsAdmin())
-            {
-                return RedirectToAction("Login", "Account", new { area = "" });
-            }
-
             return View();
         }
 
@@ -50,11 +36,6 @@ namespace FashionShop.Web.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(DanhMuc danhMuc)
         {
-            if (!IsAdmin())
-            {
-                return RedirectToAction("Login", "Account", new { area = "" });
-            }
-
             if (!ModelState.IsValid)
             {
                 return View(danhMuc);
@@ -78,11 +59,6 @@ namespace FashionShop.Web.Areas.Admin.Controllers
 
         public async Task<IActionResult> Edit(int id)
         {
-            if (!IsAdmin())
-            {
-                return RedirectToAction("Login", "Account", new { area = "" });
-            }
-
             var danhMuc = await _context.DanhMucs.FindAsync(id);
 
             if (danhMuc == null)
@@ -97,11 +73,6 @@ namespace FashionShop.Web.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, DanhMuc danhMuc)
         {
-            if (!IsAdmin())
-            {
-                return RedirectToAction("Login", "Account", new { area = "" });
-            }
-
             if (id != danhMuc.Id)
             {
                 return BadRequest();
@@ -140,11 +111,6 @@ namespace FashionShop.Web.Areas.Admin.Controllers
 
         public async Task<IActionResult> Delete(int id)
         {
-            if (!IsAdmin())
-            {
-                return RedirectToAction("Login", "Account", new { area = "" });
-            }
-
             var danhMuc = await _context.DanhMucs
                 .Include(x => x.SanPhams)
                 .FirstOrDefaultAsync(x => x.Id == id);
@@ -161,11 +127,6 @@ namespace FashionShop.Web.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (!IsAdmin())
-            {
-                return RedirectToAction("Login", "Account", new { area = "" });
-            }
-
             var danhMuc = await _context.DanhMucs
                 .Include(x => x.SanPhams)
                 .FirstOrDefaultAsync(x => x.Id == id);

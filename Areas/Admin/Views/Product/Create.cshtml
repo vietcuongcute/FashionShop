@@ -16,7 +16,7 @@
 </div>
 
 <div class="admin-card form-card">
-    <form asp-area="Admin" asp-controller="Product" asp-action="Create" method="post">
+    <form asp-area="Admin" asp-controller="Product" asp-action="Create" method="post" enctype="multipart/form-data">
         @Html.AntiForgeryToken()
 
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -50,9 +50,8 @@
         </div>
 
         <div class="form-group">
-            <label asp-for="HinhAnh">Đường dẫn ảnh</label>
-            <input asp-for="HinhAnh" class="form-control"
-                   placeholder="/images/products/ten-anh.jpg hoặc link ảnh online" />
+            <label>Ảnh sản phẩm</label>
+            <input type="file" name="imageFile" class="form-control" accept="image/*" />
             <span asp-validation-for="HinhAnh" class="text-danger"></span>
         </div>
 

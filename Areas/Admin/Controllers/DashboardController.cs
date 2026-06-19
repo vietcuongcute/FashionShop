@@ -2,10 +2,12 @@ using FashionShop.Web.Data;
 using FashionShop.Web.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using FashionShop.Web.Filters;
 
 namespace FashionShop.Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [AdminAuthorize]
     public class DashboardController : Controller
     {
         private readonly FashionShopDbContext _context;

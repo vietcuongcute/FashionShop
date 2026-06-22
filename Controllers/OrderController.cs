@@ -156,10 +156,17 @@ namespace FashionShop.Web.Controllers
 
         public async Task<IActionResult> Success(int id)
         {
+            var userId = HttpContext.Session.GetInt32("UserId");
+
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
             var donHang = await _context.DonHangs
                 .Include(dh => dh.ChiTietDonHangs)
                 .ThenInclude(ct => ct.SanPham)
-                .FirstOrDefaultAsync(dh => dh.Id == id);
+                .FirstOrDefaultAsync(dh => dh.Id == id && dh.NguoiDungId == userId.Value);
 
             if (donHang == null)
             {

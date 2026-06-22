@@ -4,12 +4,14 @@ using FashionShop.Web.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
+using Microsoft.AspNetCore.Identity;
+
 namespace FashionShop.Web.Controllers
 {
     public class AccountController : Controller
     {
         private readonly FashionShopDbContext _context;
-
+        private readonly PasswordHasher<NguoiDung> _passwordHasher = new PasswordHasher<NguoiDung>();
         public AccountController(FashionShopDbContext context)
         {
             _context = context;
@@ -53,11 +55,12 @@ namespace FashionShop.Web.Controllers
             {
                 HoTen = model.HoTen.Trim(),
                 Email = model.Email.Trim(),
-                MatKhau = model.MatKhau,
                 SoDienThoai = model.SoDienThoai,
                 DiaChi = model.DiaChi,
                 VaiTro = "Customer"
             };
+
+            nguoiDung.MatKhau = _passwordHasher.HashPassword(nguoiDung, model.MatKhau);
 
             _context.NguoiDungs.Add(nguoiDung);
             await _context.SaveChangesAsync();
@@ -96,9 +99,22 @@ namespace FashionShop.Web.Controllers
 
             var email = model.Email.Trim();
             var nguoiDung = await _context.NguoiDungs
-                .FirstOrDefaultAsync(x => x.Email == email && x.MatKhau == model.MatKhau);
+    .FirstOrDefaultAsync(x => x.Email == email);
 
             if (nguoiDung == null)
+            {
+                ModelState.AddModelError("", "Email hoặc mật khẩu không đúng.");
+                ViewBag.ReturnUrl = returnUrl;
+                return View(model);
+            }
+
+            var verifyResult = _passwordHasher.VerifyHashedPassword(
+                nguoiDung,
+                nguoiDung.MatKhau,
+                model.MatKhau
+            );
+
+            if (verifyResult == PasswordVerificationResult.Failed)
             {
                 ModelState.AddModelError("", "Email hoặc mật khẩu không đúng.");
                 ViewBag.ReturnUrl = returnUrl;
@@ -194,7 +210,7 @@ namespace FashionShop.Web.Controllers
 
             if (!string.IsNullOrWhiteSpace(model.MatKhau))
             {
-                user.MatKhau = model.MatKhau;
+                user.MatKhau = _passwordHasher.HashPassword(user, model.MatKhau);
             }
 
             await _context.SaveChangesAsync();
